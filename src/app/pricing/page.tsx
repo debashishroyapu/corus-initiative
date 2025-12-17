@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
-import HeroImage from "../../../public/Images/Service.jpg"; 
+import HeroImage from "../../../public/Images/service.jpg"; 
 
 const plans = [
   {
