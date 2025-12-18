@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from "next/link";
@@ -7,16 +6,39 @@ import { useEffect, useState } from "react";
 import { fetchBlogBySlug, Blog } from "../../lib/api";
 import { getBlogImages } from "../../lib/blog-images";
 
-type Props = { params: { slug: string } };
+// Next.js 15 compatible type - params is now a Promise
+type Props = { 
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
 export default function BlogSlugPage({ params }: Props) {
+  const [slug, setSlug] = useState<string | null>(null);
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Extract slug from params Promise
+  useEffect(() => {
+    const extractSlug = async () => {
+      try {
+        const resolvedParams = await params;
+        setSlug(resolvedParams.slug);
+      } catch (error) {
+        console.error("Failed to resolve params:", error);
+        setLoading(false);
+      }
+    };
+
+    extractSlug();
+  }, [params]);
+
+  // Fetch blog data when slug is available
   useEffect(() => {
     const loadBlog = async () => {
+      if (!slug) return;
+
       try {
-        const data = await fetchBlogBySlug(params.slug);
+        const data = await fetchBlogBySlug(slug);
         setBlog(data ?? null);
       } catch (error) {
         console.error("Failed to load blog:", error);
@@ -26,22 +48,36 @@ export default function BlogSlugPage({ params }: Props) {
       }
     };
 
-    loadBlog();
-  }, [params.slug]);
+    if (slug) {
+      loadBlog();
+    }
+  }, [slug]);
 
   if (loading) {
     return (
-      <p className="text-white text-center mt-20 text-xl">
-        Loading blog...
-      </p>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 pt-28 pb-20 px-6 md:px-12 text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+          <p className="text-xl">Loading blog...</p>
+        </div>
+      </div>
     );
   }
 
   if (!blog) {
     return (
-      <p className="text-white text-center mt-20 text-xl">
-        Blog not found
-      </p>
+      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 pt-28 pb-20 px-6 md:px-12 text-white flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Blog Not Found</h1>
+          <p className="text-gray-400 mb-6">The blog post you're looking for doesn't exist.</p>
+          <Link
+            href="/blog"
+            className="inline-block px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-green-600 hover:from-green-600 hover:to-blue-600 transition text-white font-semibold"
+          >
+            ← Back to Blog
+          </Link>
+        </div>
+      </div>
     );
   }
 
@@ -119,7 +155,7 @@ export default function BlogSlugPage({ params }: Props) {
           </h2>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
             Whether you're looking to collaborate or learn more about the latest in digital innovation,
-            we’re here to help your ideas take shape.
+            we're here to help your ideas take shape.
           </p>
 
           <motion.a
@@ -127,7 +163,7 @@ export default function BlogSlugPage({ params }: Props) {
             href="/consultation"
             className="inline-block px-8 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 hover:opacity-90 transition-all text-white shadow-md"
           >
-            Let’s Connect →
+            Let's Connect →
           </motion.a>
         </div>
 
