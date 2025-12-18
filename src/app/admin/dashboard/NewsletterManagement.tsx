@@ -4,15 +4,16 @@ import { getSubscribers, deleteSubscriber, getSubscriberStats } from '../../lib/
 import { useAuth } from '../../contexts/AuthContext';
 
 // Interfaces
-interface NewsletterSubscriber {
-  _id: string;
+export interface NewsletterSubscriber {
+  _id?: string;
   email: string;
   name?: string;
   isActive: boolean;
-  subscribedAt: string;
-  createdAt: string;
-  updatedAt: string;
+  subscribedAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
+
 
 interface ApiResponse<T = any> {
   success: boolean;
