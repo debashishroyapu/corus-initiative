@@ -14,14 +14,17 @@ import {
   TrendingUp,
 } from "lucide-react";
 
+// Next.js 15 compatible props
 interface CaseStudyPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
-  const { slug } = params;
+  // Await the params Promise
+  const { slug } = await params;
   const study = await fetchCaseStudyBySlug(slug);
 
   if (!study) {
@@ -62,6 +65,7 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
               fill
               className="object-cover"
               priority
+              sizes="(max-width: 768px) 100vw, 1200px"
             />
             <div className="absolute inset-0 bg-black/40" />
           </div>
@@ -169,51 +173,49 @@ export default async function CaseStudyPage({ params }: CaseStudyPageProps) {
       )}
 
       {/* ================= CTA ================= */}
-      {/* ================= CTA ================= */}
-<section className="py-20">
-  <div className="relative max-w-5xl mx-auto px-6">
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-blue-600/20 via-cyan-500/10 to-green-600/20 backdrop-blur-xl shadow-2xl p-10 md:p-14 text-center">
+      <section className="py-20">
+        <div className="relative max-w-5xl mx-auto px-6">
+          <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-blue-600/20 via-cyan-500/10 to-green-600/20 backdrop-blur-xl shadow-2xl p-10 md:p-14 text-center">
 
-      {/* Decorative gradient blobs */}
-      <div className="absolute -top-20 -left-20 w-72 h-72 bg-blue-500/30 rounded-full blur-3xl" />
-      <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-green-500/30 rounded-full blur-3xl" />
+            {/* Decorative gradient blobs */}
+            <div className="absolute -top-20 -left-20 w-72 h-72 bg-blue-500/30 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-green-500/30 rounded-full blur-3xl" />
 
-      <div className="relative z-10">
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
-          Ready to Build Your Next Success Story?
-        </h2>
+            <div className="relative z-10">
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+                Ready to Build Your Next Success Story?
+              </h2>
 
-        <p className="text-gray-300 max-w-2xl mx-auto mb-8 text-lg">
-          Let’s turn your idea into a scalable, high-impact digital solution.
-          Our team is ready to collaborate and deliver measurable results.
-        </p>
+              <p className="text-gray-300 max-w-2xl mx-auto mb-8 text-lg">
+                Let's turn your idea into a scalable, high-impact digital solution.
+                Our team is ready to collaborate and deliver measurable results.
+              </p>
 
-        <div className="flex justify-center gap-4 flex-wrap">
-          <Link
-            href="/consultation"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-lg font-semibold
-                       bg-gradient-to-r from-blue-600 to-green-600
-                       hover:from-blue-700 hover:to-green-700
-                       transition-all shadow-lg"
-          >
-            Start a Project
-            <ArrowRight className="h-5 w-5" />
-          </Link>
+              <div className="flex justify-center gap-4 flex-wrap">
+                <Link
+                  href="/consultation"
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-full text-lg font-semibold
+                             bg-gradient-to-r from-blue-600 to-green-600
+                             hover:from-blue-700 hover:to-green-700
+                             transition-all shadow-lg"
+                >
+                  Start a Project
+                  <ArrowRight className="h-5 w-5" />
+                </Link>
 
-          <Link
-            href="/case-studies"
-            className="inline-flex items-center px-8 py-4 rounded-full text-lg font-semibold
-                       border border-white/20 text-white
-                       hover:bg-white/10 transition-all"
-          >
-            View More Case Studies
-          </Link>
+                <Link
+                  href="/case-studies"
+                  className="inline-flex items-center px-8 py-4 rounded-full text-lg font-semibold
+                             border border-white/20 text-white
+                             hover:bg-white/10 transition-all"
+                >
+                  View More Case Studies
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
-  </div>
-</section>
-
+      </section>
     </div>
   );
 }
