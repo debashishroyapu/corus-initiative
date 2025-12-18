@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { fetchBlogBySlug, Blog } from "../../lib/api";
-import { getBlogImages} from "../../lib/blog-images";
+import { getBlogImages } from "../../lib/blog-images";
 import { useEffect, useState } from "react";
 
 type Props = { params: { slug: string } };
@@ -30,26 +31,19 @@ export default function BlogSlugPage({ params }: Props) {
 
   if (loading) {
     return (
-      <p className="text-white text-center mt-20">
-        Loading blog...
-      </p>
+      <p className="text-white text-center mt-20">Loading blog...</p>
     );
   }
 
   if (!blog) {
     return (
-      <p className="text-white text-center mt-20">
-        Blog not found
-      </p>
+      <p className="text-white text-center mt-20">Blog not found</p>
     );
   }
 
-  /* ================= Safe defaults ================= */
+  // ================= Safe defaults =================
   const image =
-  blog.image ??
-  getBlogImages(blog.slug) ??
-  "/images/blogs/default.jpg";
-
+    blog.image ?? getBlogImages(blog.slug) ?? "/images/blogs/default.jpg";
 
   const publishedAt = blog.publishedAt
     ? new Date(blog.publishedAt)
@@ -67,26 +61,18 @@ export default function BlogSlugPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 pt-28 pb-20 px-6 md:px-12 text-white">
       <div className="max-w-4xl mx-auto">
-        {/* ================= Header ================= */}
+        {/* Header */}
         <div className="text-center mb-10">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">
-            {blog.title}
-          </h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">{blog.title}</h1>
 
           {blog.excerpt && (
-            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-              {blog.excerpt}
-            </p>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">{blog.excerpt}</p>
           )}
 
           <div className="flex flex-wrap justify-center items-center gap-3 mt-6 text-sm text-gray-400">
             {blog.author && <span>✍️ {blog.author}</span>}
             <span>•</span>
-            {blog.category && (
-              <span className="text-blue-400">
-                {blog.category}
-              </span>
-            )}
+            {blog.category && <span className="text-blue-400">{blog.category}</span>}
             <span>•</span>
             <span>{formattedDate}</span>
             {blog.readTime && (
@@ -98,21 +84,22 @@ export default function BlogSlugPage({ params }: Props) {
           </div>
         </div>
 
-        {/* ================= Image ================= */}
-        <div className="rounded-3xl overflow-hidden shadow-2xl mb-10">
-          <img
+        {/* Image */}
+        <div className="rounded-3xl overflow-hidden shadow-2xl mb-10 relative h-80">
+          <Image
             src={image}
             alt={blog.title}
-            className="w-full h-[400px] object-cover hover:scale-105 transition-transform duration-700"
+            fill
+            className="object-cover hover:scale-105 transition-transform duration-700"
           />
         </div>
 
-        {/* ================= Content ================= */}
+        {/* Content */}
         <article className="prose prose-lg prose-invert prose-headings:text-white prose-p:text-gray-300 max-w-none whitespace-pre-line">
           {content}
         </article>
 
-        {/* ================= Tags ================= */}
+        {/* Tags */}
         {tags.length > 0 && (
           <div className="mt-10 flex flex-wrap gap-2">
             {tags.map((tag) => (
@@ -126,17 +113,14 @@ export default function BlogSlugPage({ params }: Props) {
           </div>
         )}
 
-        {/* ================= CTA ================= */}
+        {/* CTA */}
         <div className="text-center bg-gradient-to-r from-blue-600/20 via-cyan-500/20 to-indigo-600/20 py-16 px-8 mt-16 rounded-3xl border border-white/10 shadow-lg backdrop-blur-md">
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
             Have a Story to Share or Need Expert Insights?
           </h2>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-            Whether you're looking to collaborate or learn more
-            about the latest in digital innovation, we’re here
-            to help your ideas take shape.
+            Whether you're looking to collaborate or learn more about the latest in digital innovation, we’re here to help your ideas take shape.
           </p>
-
           <motion.a
             whileHover={{ scale: 1.05 }}
             href="/consultation"
@@ -146,7 +130,7 @@ export default function BlogSlugPage({ params }: Props) {
           </motion.a>
         </div>
 
-        {/* ================= Back ================= */}
+        {/* Back Link */}
         <div className="mt-16 text-center">
           <Link
             href="/blog"
