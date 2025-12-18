@@ -1,11 +1,11 @@
+
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 import { fetchBlogBySlug, Blog } from "../../lib/api";
 import { getBlogImages } from "../../lib/blog-images";
-import { useEffect, useState } from "react";
 
 type Props = { params: { slug: string } };
 
@@ -31,24 +31,24 @@ export default function BlogSlugPage({ params }: Props) {
 
   if (loading) {
     return (
-      <p className="text-white text-center mt-20">Loading blog...</p>
+      <p className="text-white text-center mt-20 text-xl">
+        Loading blog...
+      </p>
     );
   }
 
   if (!blog) {
     return (
-      <p className="text-white text-center mt-20">Blog not found</p>
+      <p className="text-white text-center mt-20 text-xl">
+        Blog not found
+      </p>
     );
   }
 
-  // ================= Safe defaults =================
-  const image =
-    blog.image ?? getBlogImages(blog.slug) ?? "/images/blogs/default.jpg";
+  // Safe image fallback
+  const image = blog.image ?? getBlogImages(blog.slug) ?? "/images/blogs/default.jpg";
 
-  const publishedAt = blog.publishedAt
-    ? new Date(blog.publishedAt)
-    : new Date();
-
+  const publishedAt = blog.publishedAt ? new Date(blog.publishedAt) : new Date();
   const formattedDate = publishedAt.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",
@@ -71,7 +71,7 @@ export default function BlogSlugPage({ params }: Props) {
 
           <div className="flex flex-wrap justify-center items-center gap-3 mt-6 text-sm text-gray-400">
             {blog.author && <span>✍️ {blog.author}</span>}
-            <span>•</span>
+            {blog.author && <span>•</span>}
             {blog.category && <span className="text-blue-400">{blog.category}</span>}
             <span>•</span>
             <span>{formattedDate}</span>
@@ -85,12 +85,11 @@ export default function BlogSlugPage({ params }: Props) {
         </div>
 
         {/* Image */}
-        <div className="rounded-3xl overflow-hidden shadow-2xl mb-10 relative h-80">
-          <Image
+        <div className="rounded-3xl overflow-hidden shadow-2xl mb-10">
+          <img
             src={image}
             alt={blog.title}
-            fill
-            className="object-cover hover:scale-105 transition-transform duration-700"
+            className="w-full h-[400px] object-cover hover:scale-105 transition-transform duration-700"
           />
         </div>
 
@@ -119,8 +118,10 @@ export default function BlogSlugPage({ params }: Props) {
             Have a Story to Share or Need Expert Insights?
           </h2>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
-            Whether you're looking to collaborate or learn more about the latest in digital innovation, we’re here to help your ideas take shape.
+            Whether you're looking to collaborate or learn more about the latest in digital innovation,
+            we’re here to help your ideas take shape.
           </p>
+
           <motion.a
             whileHover={{ scale: 1.05 }}
             href="/consultation"
