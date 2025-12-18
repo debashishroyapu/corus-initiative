@@ -3,13 +3,15 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getStats, updateStats, simulateNewOrder } from '../../lib/api';
 
-interface StatsData {
-  _id: string;
+export interface StatsData {
+  _id?: string;
   happyClients: number;
   projectsDone: number;
   clientSatisfaction: number;
   totalRevenue: number;
   lastUpdated: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export default function StatsManagement() {
