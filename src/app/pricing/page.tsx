@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
-import HeroImage from "/images/service.jpg";
+
 
 const plans = [
   {
@@ -112,15 +112,18 @@ export default function PricingPage() {
           transition={{ duration: 1 }}
           className="flex-1"
         >
-          <Image
-            src={HeroImage}
-            alt="Agency Hero"
-            className="rounded-2xl shadow-2xl border border-gray-700 object-cover"
-          />
+          
         </motion.div>
       </div>
 
-      {/* 💳 Pricing Plans */}
+      <Image
+  src="/images/service.jpg"
+  alt="Agency Hero"
+  width={600}
+  height={400}
+  className="rounded-2xl shadow-2xl border border-gray-700 object-cover"
+/>
+
       <div id="plans" className="relative z-10 px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.h2
