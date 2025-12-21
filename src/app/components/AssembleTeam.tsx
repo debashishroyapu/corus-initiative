@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const teamRoles = [
-  { title: "Web Developer & SEO Consultant", img: "/Images/Team/Debashish.png" },
-  { title: "Data Analyst", img: "/Images/Team/Anmoy.png" },
-  { title: "Digital Marketer", img: "/Images/Team/Joykanto.png" },
-  { title: "Graphics Designer", img: "/Images/Team/Antor.png" },
+  { title: "Web Developer & SEO Consultant", img: "/images/Team/Debashish.png" },
+  { title: "Data Analyst", img: "/images/Team/Anmoy.png" },
+  { title: "Digital Marketer", img: "/images/Team/Joykanto.png" },
+  { title: "Graphics Designer", img: "/images/Team/Antor.png" },
 ];
 
 export default function AssembleTeam() {
@@ -26,7 +26,7 @@ export default function AssembleTeam() {
           viewport={{ once: true }}
           className="text-4xl md:text-5xl font-extrabold mb-16 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent"
         >
-          Meet the <span className="text-white">CorusInitiative</span> Team
+          Meet Our <span className="text-white">Top Experts</span>
         </motion.h2>
 
         {/* Team Grid */}

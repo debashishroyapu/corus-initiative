@@ -216,7 +216,7 @@ const IndustryPage: React.FC = () => {
           </p>
           <motion.a
             whileHover={{ scale: 1.05 }}
-            href="/contact"
+            href="/schedule-call"
             className="inline-block px-8 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 hover:opacity-90 transition-all text-white shadow-md"
           >
             Let’s Get Started →

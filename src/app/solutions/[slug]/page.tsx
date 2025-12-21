@@ -270,7 +270,7 @@ export default function SolutionPage() {
         <div className="text-center bg-gradient-to-r from-blue-600/20 via-cyan-500/20 to-indigo-600/20 py-16 px-8 rounded-3xl border border-white/10 shadow-lg backdrop-blur-md mt-16">
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4">Ready to Transform Your Product & Engineering Journey?</h2>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto">From strategy to deployment, we ensure innovative solutions that deliver measurable impact and drive growth.</p>
-          <motion.a whileHover={{ scale: 1.05 }} href="/contact" className="inline-block px-8 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 hover:opacity-90 transition-all text-white shadow-md">Let’s Get Started →</motion.a>
+          <motion.a whileHover={{ scale: 1.05 }} href="/schedule-call" className="inline-block px-8 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 hover:opacity-90 transition-all text-white shadow-md">Let’s Get Started →</motion.a>
         </div>
       </AnimatedSection>
     </div>

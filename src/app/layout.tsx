@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Corus-Initiative - Engineering Excellence",
+  title: "Corus-Initiative ",
   description: "Transform your business with data-driven engineering, innovative design, and cutting-edge software solutions",
   keywords: "software development, web development, data analytics, digital marketing, UI/UX design",
   authors: [{ name: "Corus Initiative" }],

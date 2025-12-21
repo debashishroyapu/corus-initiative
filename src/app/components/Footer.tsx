@@ -68,10 +68,10 @@ export default function Footer() {
               <div className="text-gray-400">Engineering Digital Growth</div>
             </div>
           </div>
-          <nav className="space-y-1">
+          <nav className="space-y-3">
             <Link href="/about" className="hover:text-blue-400 transition">About Us</Link>
-            <Link href="/blog/future-of-web-development" className="hover:text-blue-400 transition">Technologies</Link>
-            <Link href="/blog/scaling-with-custom-software" className="hover:text-blue-400 transition">Software Services</Link>
+            <Link href="/blog/future-of-web-development" className="hover:text-blue-400 transition ml-1">Technologies</Link>
+            <Link href="/solutions" className="hover:text-blue-400 transition ml-1">Services</Link>
           </nav>
           <div className="text-gray-500 text-xs">© {new Date().getFullYear()} Corus-Initiative</div>
         </motion.div>
@@ -81,8 +81,8 @@ export default function Footer() {
           <h4 className="font-semibold mb-2 text-white text-sm">Discover</h4>
           <ul className="space-y-1 text-gray-400 text-xs">
             <li><Link href="/about" className="hover:text-blue-400 transition">About Us</Link></li>
-            <li><Link href="/industries" className="hover:text-blue-400 transition">Technologies</Link></li>
-            <li><Link href="/solutions" className="hover:text-blue-400 transition">Services</Link></li>
+            <li><Link href="/industries" className="hover:text-blue-400 transition">Industries</Link></li>
+            <li><Link href="/solutions" className="hover:text-blue-400 transition">Solutions</Link></li>
           </ul>
         </motion.div>
 

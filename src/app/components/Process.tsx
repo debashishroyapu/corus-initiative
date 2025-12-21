@@ -1,3 +1,5 @@
+
+
 "use client";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useRef, MouseEvent } from "react";
@@ -323,12 +325,13 @@ export default function ProcessSection() {
             <span className="text-sm text-gray-300 font-medium">Enterprise-Grade Process</span>
           </motion.div>
 
+          {/* Responsive Excellence Header */}
           <motion.h2 
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
             viewport={{ once: true }}
-            className="text-6xl md:text-7xl font-bold mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 flex flex-wrap justify-center md:justify-center gap-2"
           >
             <span className="bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
               Streamlined
@@ -336,7 +339,7 @@ export default function ProcessSection() {
             <motion.span
               animate={{ backgroundPosition: ["0% 0%", "100% 100%"] }}
               transition={{ duration: 3, repeat: Infinity }}
-              className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent bg-size-200 bg-pos-0 hover:bg-pos-100 transition-all duration-500 ml-4"
+              className="bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 bg-clip-text text-transparent bg-size-200 bg-pos-0 hover:bg-pos-100 transition-all duration-500"
             >
               Excellence
             </motion.span>
@@ -388,70 +391,78 @@ export default function ProcessSection() {
           ))}
         </div>
 
-        {/* Enhanced CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/30 backdrop-blur-xl border border-gray-700/30 rounded-3xl p-12 max-w-4xl mx-auto relative overflow-hidden">
-            {/* Background Animation */}
-            <motion.div
-              animate={{
-                backgroundPosition: ["0% 0%", "100% 100%"],
-              }}
-              transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "linear",
-              }}
-              className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent -skew-x-12"
-            />
-            
-            <div className="relative z-10">
-              <h3 className="text-4xl font-bold text-white mb-6">
-                Ready to Transform Your Vision?
-              </h3>
-              <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
-                Join 50+ enterprises that trust us with their digital transformation journey.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="group relative bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 overflow-hidden"
-                >
-                  <span className="flex items-center gap-2 relative z-10">
-                    Schedule Discovery Call
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                </motion.button>
-                
-                <motion.button 
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 backdrop-blur-sm"
-                >
-                  View Case Studies
-                </motion.button>
-              </div>
-              
-              <div className="mt-8 pt-8 border-t border-gray-700/50">
-                <p className="text-gray-500 text-sm">
-                  By continuing, you agree to our{" "}
-                  <a href="#" className="text-gray-400 hover:text-white underline transition-colors">Cookie Policy</a>{" "}
-                  and{" "}
-                  <a href="#" className="text-gray-400 hover:text-white underline transition-colors">Privacy Policy</a>
-                </p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+        {/* Hero Section & CTA */}
+<motion.div
+  initial={{ opacity: 0, y: 50 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  transition={{ duration: 0.8, delay: 0.4 }}
+  viewport={{ once: true }}
+  className="text-center px-6"
+>
+  <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/30 backdrop-blur-xl border border-gray-700/30 rounded-3xl p-12 max-w-4xl mx-auto relative overflow-hidden">
+    
+    {/* Background Animation */}
+    <motion.div
+      animate={{
+        backgroundPosition: ["0% 0%", "100% 100%"],
+      }}
+      transition={{
+        duration: 10,
+        repeat: Infinity,
+        ease: "linear",
+      }}
+      className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent -skew-x-12"
+    />
+
+    {/* Header */}
+    <h3 className="text-4xl font-bold text-white mb-6">
+      Ready to Transform Your Vision?
+    </h3>
+    <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
+      Join 50+ enterprises that trust us with their digital transformation journey.
+    </p>
+
+    {/* Buttons */}
+    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      {/* Schedule Discovery Call */}
+      <motion.a
+        href="/schedule-call" 
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="group relative bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 shadow-2xl hover:shadow-blue-500/25 overflow-hidden"
+      >
+        <span className="flex items-center gap-2 relative z-10">
+          Schedule Discovery Call
+          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+        </span>
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      </motion.a>
+
+      {/* View Case Studies */}
+      <motion.a
+        href="/case-studies" // update with your link
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="group relative border border-gray-600 text-gray-300 hover:text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-300 backdrop-blur-sm overflow-hidden"
+      >
+        <span className="relative z-10">View Case Studies</span>
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-cyan-500 opacity-0 group-hover:opacity-30 transition-opacity duration-500 rounded-2xl" />
+      </motion.a>
+    </div>
+
+    {/* Footer Text */}
+    <div className="mt-8 pt-8 border-t border-gray-700/50">
+      <p className="text-gray-500 text-sm">
+        By continuing, you agree to our{" "}
+        <a href="#" className="text-gray-400 hover:text-white underline transition-colors">Cookie Policy</a>{" "}
+        and{" "}
+        <a href="#" className="text-gray-400 hover:text-white underline transition-colors">Privacy Policy</a>
+      </p>
+    </div>
+  </div>
+</motion.div>
+</div>
 
       <style jsx>{`
         @keyframes grid {
@@ -484,8 +495,4 @@ export default function ProcessSection() {
     </section>
   );
 }
-
-
-
-
 

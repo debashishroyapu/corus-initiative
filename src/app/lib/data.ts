@@ -263,7 +263,351 @@ export const fallbackSolutions = [
         description: "Monthly analytics and actionable insights."
       }
     ]
-  }
+  },
+   {
+        slug: "seo-ai-optimization",
+        title: "SEO & AI Optimization",
+        subtitle: "Be Found Everywhere — From Google to AI",
+        description: "Our SEO + AI optimization ensures your brand ranks across Google, ChatGPT, and voice search. We blend traditional SEO with emerging AI-driven strategies for complete visibility.",
+        workflow: [
+          {
+            title: "SEO Audit & Strategy",
+            description: "Full audit of your site and keyword landscape to identify growth opportunities."
+          },
+          {
+            title: "On-Page Optimization",
+            description: "Content and metadata tuned for both Google and AI search engines."
+          },
+          {
+            title: "Technical SEO",
+            description: "Improve crawlability, site speed, and structure for better performance."
+          },
+          {
+            title: "Authority Building",
+            description: "Ethical backlinking and PR strategies to improve credibility."
+          },
+          {
+            title: "AEO & GEO Optimization",
+            description: "Optimize for AI and generative search visibility."
+          }
+        ],
+        expertise: [
+          {
+            title: "On-Page SEO",
+            description: "Optimize keywords, schema, and headings for better search visibility."
+          },
+          {
+            title: "Off-Page SEO",
+            description: "Backlink campaigns and PR for authority."
+          },
+          {
+            title: "Technical SEO",
+            description: "Fix site speed, sitemaps, and indexation issues."
+          },
+          {
+            title: "Local SEO",
+            description: "Optimize for geo-targeted traffic and Google Business Profiles."
+          },
+          {
+            title: "E-Commerce SEO",
+            description: "Boost rankings for products and categories."
+          },
+          {
+            title: "AEO/GEO Optimization",
+            description: "Featured snippets, voice search, and AI-readiness."
+          }
+        ],
+        deliverables: [
+          {
+            item: "SEO Audit Report",
+            description: "Full technical and content audit with action plan."
+          },
+          {
+            item: "Keyword Strategy",
+            description: "Mapped keyword clusters aligned with goals."
+          },
+          {
+            item: "Optimized Content",
+            description: "High-performing blogs and landing pages."
+          },
+          {
+            item: "Backlink Campaigns",
+            description: "Quality backlinks for authority growth."
+          },
+          {
+            item: "AI Visibility",
+            description: "Appear across AI-driven platforms like ChatGPT and Bing Copilot."
+          }
+        ]
+      },
+      {
+        slug: "data-analytics",
+        title: "Data Analytics",
+        subtitle: "Transform Raw Data into Actionable Insights",
+        description: "We help you collect, clean, and interpret data to make smarter business decisions. From dashboards to predictive analytics, our solutions turn data into growth.",
+        workflow: [
+          {
+            title: "Goal Setting",
+            description: "We identify business areas where analytics creates maximum impact."
+          },
+          {
+            title: "Data Collection",
+            description: "Gather and clean data from CRMs, ERPs, and other systems."
+          },
+          {
+            title: "Exploratory Analysis",
+            description: "Identify trends and correlations that drive decisions."
+          },
+          {
+            title: "Advanced Analytics",
+            description: "Use ML models for prediction and optimization."
+          },
+          {
+            title: "Visualization",
+            description: "Create dashboards for actionable insights."
+          }
+        ],
+        expertise: [
+          {
+            title: "Data Cleaning",
+            description: "Prepare accurate, reliable data for analytics."
+          },
+          {
+            title: "Predictive Modeling",
+            description: "Use data science to forecast trends."
+          },
+          {
+            title: "Visualization",
+            description: "Design dashboards that simplify data understanding."
+          },
+          {
+            title: "Custom Analytics",
+            description: "Tailor-made data pipelines and systems."
+          }
+        ],
+        deliverables: [
+          {
+            item: "Clean Data",
+            description: "Structured and validated datasets ready for insights."
+          },
+          {
+            item: "Interactive Dashboards",
+            description: "Custom visualization for key KPIs."
+          },
+          {
+            item: "Predictive Reports",
+            description: "AI-powered insights to guide decisions."
+          },
+          {
+            item: "Continuous Monitoring",
+            description: "Real-time data tracking and optimization."
+          }
+        ]
+      },
+      {
+        slug: "ui-ux-design",
+        title: "UI/UX Design",
+        subtitle: "Craft Engaging Experiences That Delight Your Users",
+        description: "We design intuitive, visually stunning, and user-centered interfaces that improve engagement and conversions. Every pixel and interaction is crafted with purpose.",
+        workflow: [
+          {
+            title: "User Research",
+            description: "Understand audience needs and behaviors."
+          },
+          {
+            title: "Wireframing",
+            description: "Map out layouts and flows for clarity."
+          },
+          {
+            title: "Visual Design",
+            description: "Create beautiful, brand-aligned visuals."
+          },
+          {
+            title: "User Testing",
+            description: "Validate designs with real user feedback."
+          },
+          {
+            title: "Design Handoff",
+            description: "Provide assets and guides for smooth development."
+          }
+        ],
+        expertise: [
+          {
+            title: "User Research",
+            description: "In-depth analysis of user needs and goals."
+          },
+          {
+            title: "Prototyping",
+            description: "Interactive models for early validation."
+          },
+          {
+            title: "Visual Design",
+            description: "Clean, aesthetic, and accessible interfaces."
+          },
+          {
+            title: "Usability Testing",
+            description: "Real-world testing for UX improvements."
+          }
+        ],
+        deliverables: [
+          {
+            item: "User-Centered Designs",
+            description: "Attractive and intuitive layouts."
+          },
+          {
+            item: "Prototypes",
+            description: "Clickable mockups simulating the final experience."
+          },
+          {
+            item: "Design Assets",
+            description: "All icons, typography, and guides provided."
+          },
+          {
+            item: "Usability Report",
+            description: "Actionable feedback from testing."
+          }
+        ]
+      },
+      {
+        slug: "app-development",
+        title: "App Development",
+        subtitle: "Build Powerful Mobile Apps That Engage and Convert",
+        description: "We build high-performance mobile apps that connect your brand with users through intuitive design and seamless functionality.",
+        workflow: [
+          {
+            title: "Requirement Gathering",
+            description: "Define app goals, audience, and technical needs."
+          },
+          {
+            title: "UI/UX Design",
+            description: "Design wireframes, prototypes, and visuals."
+          },
+          {
+            title: "Development",
+            description: "Build robust apps for Android, iOS, or cross-platform."
+          },
+          {
+            title: "Testing",
+            description: "Quality checks for functionality and security."
+          },
+          {
+            title: "Deployment & Support",
+            description: "Launch and maintain your app post-release."
+          }
+        ],
+        expertise: [
+          {
+            title: "Cross-Platform Development",
+            description: "React Native or Flutter-based apps for all devices."
+          },
+          {
+            title: "Backend Integration",
+            description: "Secure APIs and databases for scalability."
+          },
+          {
+            title: "Performance Optimization",
+            description: "Fast, efficient, and battery-friendly apps."
+          },
+          {
+            title: "Security & Compliance",
+            description: "Data protection and privacy compliance ensured."
+          }
+        ],
+        deliverables: [
+          {
+            item: "Full Mobile App",
+            description: "iOS and Android-ready application."
+          },
+          {
+            item: "App Store Deployment",
+            description: "Submission and approval management."
+          },
+          {
+            item: "Backend APIs",
+            description: "Integrated and scalable backend systems."
+          },
+          {
+            item: "Ongoing Maintenance",
+            description: "Updates and bug fixes post-launch."
+          }
+        ]
+      },
+      {
+        slug: "graphics-design",
+        title: "Graphics Design",
+        subtitle: "Visual Storytelling That Elevates Your Brand",
+        description: "Our graphic design services help your brand stand out with visuals that communicate, inspire, and convert. From logos to full-scale branding systems, we craft designs that capture attention and express your identity across every platform.",
+        workflow: [
+          {
+            title: "Brand Discovery",
+            description: "We learn your brand values, audience, and goals to create a design direction that fits your vision."
+          },
+          {
+            title: "Concept Creation",
+            description: "We brainstorm and sketch multiple creative directions that align with your message and purpose."
+          },
+          {
+            title: "Design Development",
+            description: "Our team refines concepts into professional, high-quality visuals ready for multiple formats."
+          },
+          {
+            title: "Review & Revisions",
+            description: "We collaborate with you to ensure every detail aligns with your brand and expectations."
+          },
+          {
+            title: "Delivery & Brand Assets",
+            description: "You receive all final design files optimized for print, digital, and social media."
+          }
+        ],
+        expertise: [
+          {
+            title: "Logo Design & Branding",
+            description: "Crafting timeless logos and visual identities that tell your brand story."
+          },
+          {
+            title: "Print & Marketing Collateral",
+            description: "Brochures, flyers, and posters designed to attract and inform."
+          },
+          {
+            title: "Social Media Design",
+            description: "Eye-catching visuals that boost engagement across platforms."
+          },
+          {
+            title: "Packaging Design",
+            description: "Creative packaging that enhances shelf appeal and brand recall."
+          },
+          {
+            title: "UI Design Support",
+            description: "Collaborative visual design assets for digital interfaces and products."
+          },
+          {
+            title: "Illustration & Iconography",
+            description: "Custom illustrations and icon sets that add unique personality to your brand."
+          }
+        ],
+        deliverables: [
+          {
+            item: "Complete Brand Kit",
+            description: "Logos, color palette, typography, and usage guidelines."
+          },
+          {
+            item: "Marketing Materials",
+            description: "Flyers, brochures, business cards, and posters."
+          },
+          {
+            item: "Social Media Assets",
+            description: "Post templates, banners, and ad creatives."
+          },
+          {
+            item: "Digital Graphics",
+            description: "Website banners, icons, and digital illustrations."
+          },
+          {
+            item: "Editable Source Files",
+            description: "Fully layered design files in AI, PSD, or Figma formats."
+          }
+        ]
+      }
 ];
 
 export const fallbackIndustries = [
@@ -311,7 +655,112 @@ export const fallbackIndustries = [
       { title: "Digital Marketing", description: "Build brand trust through campaigns that showcase safety, speed, and reliability." },
       { title: "Data Engineering & BI", description: "Fraud detection systems, predictive financial analytics, and automated reporting dashboards." }
     ]
-  }
+  },
+     { 
+      slug: "education-e-learning",
+        title: "Education & E-Learning",
+        overview: "Learning has no boundaries anymore. Education is no longer confined to classrooms. From online courses to global student communities, technology is breaking barriers and creating new opportunities for both educators and learners.",
+        challenges: [
+          { title: "Engagement", description: "Students expect engaging digital platforms with interactive content." },
+          { title: "Analytics", description: "Institutes benefit from data insights on student performance." },
+          { title: "Global Access", description: "Online learning platforms reach audiences far beyond geographical limits." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "Build immersive e-learning platforms, student portals, and virtual classrooms." },
+          { title: "SEO & Marketing", description: "Increase enrollments with campaigns that target learners worldwide." },
+          { title: "Analytics & BI", description: "Track performance, personalize learning experiences, and improve engagement." }
+        ]
+      },
+      {
+        slug: "real-estate-construction",
+        title: "Real Estate & Construction",
+        overview: "Where digital visibility builds real-world trust. The real estate and construction industries thrive on trust, visibility, and speed. Whether it's a family searching for their dream home, an investor looking for the right property, or a developer showcasing a new project—first impressions matter.",
+        challenges: [
+          { title: "Digital Discovery", description: "Homebuyers start their journey on Google searches and property listing sites." },
+          { title: "Immersive Experience", description: "Virtual tours and 3D property walkthroughs are now standard expectations." },
+          { title: "Data Insights", description: "Developers and builders need data-backed insights to forecast demand and optimize pricing." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "Stunning property listing websites, interactive 3D tours, and mobile-friendly booking portals." },
+          { title: "SEO & Digital Marketing", description: "Geo-targeted campaigns, Google optimization, and strong social media presence to drive leads." },
+          { title: "Data Analytics & BI", description: "Insights into buyer demographics, demand patterns, and predictive analysis for better planning." }
+        ]
+      },
+      {
+        slug: "travel-hospitality",
+        title: "Travel & Hospitality",
+        overview: "Because every journey starts online. Travelers no longer walk into agencies to plan their vacations—they open a browser or a mobile app. The journey begins with a search, and whoever shows up first wins the booking.",
+        challenges: [
+          { title: "Booking Platforms", description: "Travelers expect instant booking platforms and mobile-friendly apps." },
+          { title: "Personalized Experience", description: "Recommendations like 'best trips for couples' or 'family vacation deals' influence decisions." },
+          { title: "Digital Reputation", description: "Reviews and online presence build or break trust." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "Online booking engines, hotel management systems, and sleek travel apps." },
+          { title: "SEO & Digital Marketing", description: "Boost bookings with storytelling, influencer marketing, and high-ranking Google results." },
+          { title: "Data Analytics & BI", description: "Seasonal demand forecasting, dynamic pricing optimization, and loyalty tracking." }
+        ]
+      },
+      {
+        slug: "manufacturing-supply-chain",
+        title: "Manufacturing & Supply Chain",
+        overview: "Where efficiency defines growth. The manufacturing and supply chain industry is the backbone of global commerce. Yet, many businesses still struggle with outdated systems and lack of real-time visibility.",
+        challenges: [
+          { title: "Automation", description: "Smart factories and IoT-driven monitoring optimize production in real-time." },
+          { title: "Forecasting", description: "Data analytics helps forecast demand, reduce waste, and streamline inventory." },
+          { title: "Visibility", description: "Global B2B buyers discover manufacturers through digital visibility." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "ERP systems, vendor portals, and custom dashboards that connect your supply chain." },
+          { title: "Data Engineering & BI", description: "Real-time analytics for production efficiency and logistics optimization." },
+          { title: "Digital Marketing", description: "Showcase products and services to international buyers through SEO and targeted ads." }
+        ]
+      },
+      {
+        slug: "entertainment-media",
+        title: "Entertainment & Media",
+        overview: "Where creativity meets technology. In the entertainment world, audience attention is the real currency. From streaming platforms to content creators, success comes from unforgettable digital experiences.",
+        challenges: [
+          { title: "Streaming Demand", description: "Streaming services dominate, and on-demand content rules." },
+          { title: "Viral Visibility", description: "Social media campaigns determine whether a show goes viral or fades away." },
+          { title: "Data-Driven Insights", description: "Analytics track every click and view—shaping smarter strategies." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "Build streaming platforms, artist websites, and event ticketing portals." },
+          { title: "Digital Marketing & SEO", description: "Viral campaigns, influencer collaborations, and SEO for audience reach." },
+          { title: "Data Analytics", description: "Track engagement, predict trends, and measure campaign ROI." }
+        ]
+      },
+      {
+        slug: "logistics-transportation",
+        title: "Logistics & Transportation",
+        overview: "Delivering efficiency, speed, and reliability. In logistics, time is money—customers demand faster deliveries and real-time tracking. Technology ensures you stay competitive.",
+        challenges: [
+          { title: "Route Optimization", description: "Data analytics optimizes routes, fuel consumption, and delivery schedules." },
+          { title: "Real-Time Tracking", description: "Customers demand full visibility of their shipments." },
+          { title: "Order Management", description: "Digital platforms simplify order and fleet management." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "Fleet tracking portals, booking systems, and logistics management dashboards." },
+          { title: "Data Engineering & BI", description: "Predictive delivery analytics and demand forecasting." },
+          { title: "Digital Marketing", description: "Boost brand trust and attract B2B clients with SEO and campaigns." }
+        ]
+      },
+      {
+        slug: "government-public-sector",
+        title: "Government & Public Sector",
+        overview: "Empowering governance through technology. From smart cities to digital governance platforms, technology is reshaping how citizens and governments interact.",
+        challenges: [
+          { title: "Digital Access", description: "Citizens expect easy online access to essential services." },
+          { title: "Policy Insights", description: "Governments rely on dashboards for data-driven decision-making." },
+          { title: "Awareness", description: "Digital campaigns spread awareness faster than traditional outreach." }
+        ],
+        solutions: [
+          { title: "Web Development", description: "Citizen service portals, e-governance platforms, and smart city apps." },
+          { title: "Data Engineering & BI", description: "Policy dashboards and transparent governance systems." },
+          { title: "Digital Marketing", description: "Effective public awareness and engagement campaigns." }
+        ]
+      }
 ];
 
 export const fallbackBlogs = [

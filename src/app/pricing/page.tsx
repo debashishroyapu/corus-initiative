@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 
-
 const plans = [
   {
     name: "Basic Plan",
@@ -66,7 +65,7 @@ const addOns = [
 export default function PricingPage() {
   return (
     <section className="relative min-h-screen text-white overflow-hidden">
-      {/*  Animated Background */}
+      {/* Animated Background */}
       <motion.div
         className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#0ea5e9,_#0f172a,_#000000)] animate-gradient"
         initial={{ backgroundPosition: "0% 50%" }}
@@ -77,7 +76,7 @@ export default function PricingPage() {
       {/* Hero Section */}
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-between py-24 px-8 max-w-7xl mx-auto gap-12">
         {/* Left Text */}
-        <div className="flex-1 text-center md:text-left">
+        <div className="flex-1 text-center md:text-left space-y-4">
           <motion.h1
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -86,14 +85,34 @@ export default function PricingPage() {
           >
             Power Up Your Digital Growth 🚀
           </motion.h1>
+
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1 }}
-            className="text-gray-300 max-w-xl mb-8"
+            className="text-gray-300 max-w-xl mx-auto md:mx-0 mb-4"
           >
             From branding to automation — choose a plan that evolves with your
             business and builds your online legacy.
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.2 }}
+            className="text-gray-300 max-w-xl mx-auto md:mx-0 mb-4"
+          >
+            We help startups, growing brands, and enterprises scale their digital
+            presence with creative, technical, and analytical solutions.
+          </motion.p>
+
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1.4 }}
+            className="text-gray-300 max-w-xl mx-auto md:mx-0 mb-6"
+          >
+            Explore our plans below to find the perfect fit for your next project.
           </motion.p>
 
           <motion.a
@@ -110,20 +129,19 @@ export default function PricingPage() {
           initial={{ opacity: 0, x: 40 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1 }}
-          className="flex-1"
+          className="flex-1 flex justify-center md:justify-end"
         >
-          
+          <Image
+            src="/images/service.jpg" 
+            alt="Agency Hero"
+            width={600}
+            height={400}
+            className="rounded-2xl shadow-2xl border border-gray-700 object-cover"
+          />
         </motion.div>
       </div>
 
-      <Image
-  src="/images/service.jpg"
-  alt="Agency Hero"
-  width={600}
-  height={400}
-  className="rounded-2xl shadow-2xl border border-gray-700 object-cover"
-/>
-
+      {/* Plans Section */}
       <div id="plans" className="relative z-10 px-6 py-20 max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <motion.h2
@@ -197,7 +215,7 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* 💬 Contact Form Section */}
+      {/* Contact Form Section */}
       <div className="relative z-10 px-6 py-20 max-w-4xl mx-auto text-center">
         <motion.h3
           initial={{ opacity: 0, y: -10 }}
@@ -243,12 +261,3 @@ export default function PricingPage() {
     </section>
   );
 }
-
-
-
-
-
-
-
-
-

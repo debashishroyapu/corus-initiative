@@ -60,9 +60,13 @@ export default function HomePage() {
        <CookieConsent />
 
       {/* Sticky CTA */}
-      <motion.a href="/consultation" whileHover={{ scale: 1.05, rotate: -1 }} className="fixed bottom-6 right-6 z-50 px-6 py-4 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 text-white rounded-full shadow-lg hover:shadow-cyan-500/50 transition transform">
-        Book a Free Consultation 🚀
-      </motion.a>
+       <motion.a href="/consultation" whileHover={{ scale: 1.05, rotate: -1 }}
+        className="fixed bottom-6 right-6 z-30 px-6 py-4 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 text-white rounded-full shadow-lg hover:shadow-cyan-500/50 transition transform">
+    Book a Free Consultation 🚀 
+    </motion.a>
+       
+
+
     </main>
   );
 }
