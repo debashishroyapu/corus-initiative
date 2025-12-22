@@ -24,6 +24,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
+
 
   useEffect(() => {
     const loadMenus = async () => {
@@ -289,69 +291,127 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Menu - Also sorted */}
-        <AnimatePresence>
-          {mobileOpen && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden overflow-hidden bg-gradient-to-b from-[#0C0E15] to-[#0A0C12] rounded-2xl mt-2 mb-4 shadow-2xl border border-gray-800/50"
+       {/* Mobile Menu – Accordion + Scroll */}
+<AnimatePresence>
+  {mobileOpen && (
+    <motion.div
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: "auto" }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.25 }}
+      className="
+        lg:hidden mt-2 mb-4 rounded-2xl shadow-2xl
+        border border-gray-800/50
+        bg-gradient-to-b from-[#0C0E15] to-[#0A0C12]
+        max-h-[80vh] flex flex-col overflow-hidden
+      "
+    >
+      {/* Scrollable Content */}
+      <div className="p-4 space-y-4 overflow-y-auto">
+
+        {/* Accordion Menus */}
+        {displayMenus.map(group => (
+          <div key={group._id || group.slug} className="space-y-2">
+            <button
+              onClick={() =>
+                setMobileDropdown(
+                  mobileDropdown === group.title ? null : group.title
+                )
+              }
+              className="
+                w-full flex justify-between items-center
+                px-3 py-2 rounded-xl
+                font-semibold text-white/90
+                hover:bg-white/5 transition
+              "
             >
-              <div className="p-4 space-y-2">
-                {displayMenus.map(group => (
-                  <div key={group._id || group.slug} className="space-y-2">
-                    <div className="font-semibold text-white/90 px-2 py-1">{group.title}</div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {group.items.map(item => (
-                        <Link
-                          key={item.slug}
-                          href={item.href}
-                          className={`p-3 rounded-xl text-sm font-medium transition-all duration-300 border ${
-                            isActive(item.href)
-                              ? "bg-cyan-500/20 text-cyan-400 border-cyan-500/30"
-                              : "text-white/80 hover:bg-white/5 hover:text-cyan-400 border-gray-800/50"
-                          }`}
-                          onClick={() => setMobileOpen(false)}
-                        >
-                          <span className="font-semibold">{item.label}</span>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                {[
-                  { href: "/about", label: "About" },
-                  { href: "/pricing", label: "Pricing" },
-                  { href: "/blog", label: "Blog" },
-                  { href: "/case-studies", label: "Case Studies" }
-                ].map(item => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`block px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
-                      isActive(item.href)
-                        ? "text-cyan-400 bg-white/10"
-                        : "text-white/90 hover:text-cyan-400 hover:bg-white/5"
-                    }`}
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
-                <motion.div whileTap={{ scale: 0.95 }} className="pt-2">
-                  <Link
-                    href="/schedule-call"
-                    className="block px-4 py-3 rounded-xl font-semibold text-center transition-all duration-300 shadow-lg bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 border border-purple-400/20"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    <Calendar className="inline mr-2 w-4 h-4" />
-                    Schedule Call
-                  </Link>
+              {group.title}
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  mobileDropdown === group.title ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {mobileDropdown === group.title && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="grid grid-cols-2 gap-2 px-2"
+                >
+                  {group.items.map(item => (
+                    <Link
+                      key={item.slug}
+                      href={item.href}
+                      onClick={() => {
+                        setMobileOpen(false);
+                        setMobileDropdown(null);
+                      }}
+                      className="
+                        p-3 rounded-xl text-sm font-medium
+                        text-white/80
+                        hover:bg-white/5 hover:text-cyan-400
+                        transition
+                      "
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </motion.div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+
+        {/* Company Links */}
+        <div className="pt-2 border-t border-gray-800 space-y-1">
+          {[
+            { href: "/about", label: "About" },
+             { href: "/pricing", label: "Pricing" },
+            { href: "/blog", label: "Blog" },
+            { href: "/case-studies", label: "Case Studies" }
+
+           
+          ].map(item => (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
+              className={`block px-3 py-2 rounded-xl font-semibold transition ${
+                isActive(item.href)
+                  ? "text-cyan-400 bg-white/10"
+                  : "text-white/90 hover:bg-white/5 hover:text-cyan-400"
+              }`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Fixed CTA */}
+      <div className="p-4 border-t border-gray-800">
+        <Link
+          href="/schedule-call"
+          onClick={() => setMobileOpen(false)}
+          className="
+            block w-full text-center py-3 rounded-xl font-semibold
+            bg-gradient-to-r from-purple-600 to-blue-600 text-white
+            hover:from-purple-700 hover:to-blue-700
+            transition-all shadow-lg
+          "
+        >
+          <Calendar className="inline mr-2 w-4 h-4" />
+          Schedule Call
+        </Link>
+      </div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
       </div>
     </nav>
   );
