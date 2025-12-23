@@ -856,7 +856,7 @@ export const fallbackCaseStudies = [
   },
 ];
 
-const fallbackProjects = [
+export const fallbackProjects = [
       {
         name: "E-commerce Website Development",
         client: "ABC Corporation",
@@ -903,7 +903,7 @@ const fallbackProjects = [
         deliverables: ["Website Design", "CMS Integration", "SEO Optimization"]
       }
     ];
-     const fallbackTeamMembers = [
+    export const fallbackTeamMembers = [
       {
         name: "Debashish Roy",
         email: "debashishroyapu@gmail.com",
@@ -985,7 +985,7 @@ const fallbackProjects = [
     ];
 
     // Client Seed Data
-    const fallbackClients = [
+    export const fallbackClients = [
       {
         name: "Robert Taylor",
         email: "robert.taylor@techcorp.com",
@@ -1052,7 +1052,7 @@ const fallbackProjects = [
       }
     ];
       // Financial Seed Data
-    const fallbackFinancialData = [
+    export const fallbackFinancialData = [
       {
         period: "2024-Q1",
         dateRange: "last30Days",
@@ -1210,7 +1210,7 @@ const fallbackProjects = [
         profitMargin: 47.0
       }
     ];
-    const FallbackSchedules = [
+   export const fallbackSchedules = [
   {
     name: "Debashish Roy",
     email: "debashish@example.com",
@@ -1282,7 +1282,7 @@ const fallbackProjects = [
   }
 ];
 
-const fallbackConsultations = [
+export const fallbackConsultations = [
   {
     name: "Debashish Roy",
     email: "debashish@example.com",
@@ -1313,7 +1313,7 @@ const fallbackConsultations = [
     message: "I want to get a consultation about optimizing website performance."
   }
 ];
-  const fallbackConsentData = [
+  export const fallbackConsentData = [
       {
         consent: true,
         timestamp: new Date("2024-01-15T10:30:00Z"),
@@ -1325,7 +1325,7 @@ const fallbackConsultations = [
         userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15"
       }
     ];
-    const Subscribers = [
+    export const Subscribers = [
   {
     email: 'john.doe@example.com',
     name: 'John Doe',

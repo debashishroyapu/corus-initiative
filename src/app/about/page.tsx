@@ -152,18 +152,24 @@ export default function AboutPage() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-700"
-        >
-          <img src="/images/service.jpg"
-           alt="Innovation" 
-           className="w-full object-cover hover:scale-[1.03] transition-transform duration-500" />
-
-
-        </motion.div>
+  initial={{ opacity: 0, x: 40 }}
+  whileInView={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.7 }}
+  viewport={{ once: true }}
+  className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-700 h-[400px] md:h-[500px]"
+>
+  {/* Simple img tag with proper attributes */}
+  <img 
+    src="/images/service.jpg"
+    alt="Innovation"
+    loading="lazy"
+    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+    // Inline fallback style
+    style={{
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e40af 100%)'
+    }}
+  />
+</motion.div>
       </section>
 
       {/* CONTACT FORM */}

@@ -123,27 +123,33 @@ export default function PricingPage() {
             Explore Plans
           </motion.a>
         </div>
-
-        {/* Right Image */}
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1 }}
-          className="flex-1 flex justify-center md:justify-end"
-        >
-          <Image
-            src="/images/service.jpg" 
-            alt="Agency Hero"
-            width={600}
-            height={400}
-            className="rounded-2xl shadow-2xl border border-gray-700 object-cover"
-          />
-        </motion.div>
+          <motion.div
+  initial={{ opacity: 0, x: 40 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 1 }}
+  className="flex-1 flex justify-center md:justify-end"
+>
+  <div className="relative w-full max-w-[600px] h-[400px]">
+  
+    <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 to-blue-900/20 rounded-2xl border border-cyan-500/30"></div>
+    <img 
+      src="/images/service.jpg" 
+      alt="Agency Hero"
+      onError={(e) => {
+        e.currentTarget.style.display = 'none';
+      }}
+      className="rounded-2xl shadow-2xl border border-gray-700 object-cover w-full h-full"
+    />
+    <div className="absolute inset-0 flex items-center justify-center text-cyan-300 text-xl font-semibold opacity-0 hover:opacity-100 transition-opacity">
+      Agency Services
+    </div>
+  </div>
+</motion.div>
       </div>
 
       {/* Plans Section */}
       <div id="plans" className="relative z-10 px-6 py-20 max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-16 ">
           <motion.h2
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}

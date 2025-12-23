@@ -72,12 +72,14 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-24">
             <Link href="/" className="flex items-center flex-shrink-0">
               <div className="relative h-14 sm:h-16 md:h-20 lg:h-24 w-auto">
-                <Image 
-                  src="/images/logo.png" 
-                  alt="Corus Initiative Logo"
-                  className="h-full w-auto object-contain"
-                  priority
-                />
+<Image 
+  src="/images/logo.png"
+  alt="Corus Initiative Logo"
+  width={192}
+  height={96}
+  className="h-full w-auto object-contain" 
+  priority
+/>
               </div>
             </Link>
             <div className="hidden lg:flex items-center space-x-6">
