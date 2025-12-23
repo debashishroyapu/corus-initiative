@@ -6,7 +6,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Calendar, ChevronDown } from "lucide-react";
 import { fetchMenus, MenuGroup, MenuItem } from "../lib/api";
-import logo from "../../../public/images/logo.png"; 
+
 
 export default function Navbar() {
   const [menus, setMenus] = useState<MenuGroup[]>([]);
@@ -73,7 +73,7 @@ export default function Navbar() {
             <Link href="/" className="flex items-center flex-shrink-0">
               <div className="relative h-14 sm:h-16 md:h-20 lg:h-24 w-auto">
                 <Image 
-                  src={logo} 
+                  src="/images/logo.png" 
                   alt="Corus Initiative Logo"
                   className="h-full w-auto object-contain"
                   priority
@@ -129,7 +129,7 @@ export default function Navbar() {
               className="relative h-14 sm:h-16 md:h-20 lg:h-24 w-auto"
             >
               <Image 
-                src={logo} 
+                src="/images/logo.png"
                 alt="Corus Initiative Logo"
                 className="h-full w-auto object-contain" 
                 priority
