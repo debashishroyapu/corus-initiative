@@ -9,9 +9,9 @@ import TeamTable from '../admin/dashboard/TeamTable';
 import BlogsTable from '../admin/dashboard/BlogTable';
 import ConsultationTable from '../admin/dashboard/ConsultationTable';
 import RecentActivities from '../admin/dashboard/RecentActivities';
-import safeGet from '../lib/api';
 import ScheduleTable from "../admin/dashboard/ScheduleTable";
 import Consent from "../admin/dashboard/Consent";
+import { fetchDashboardSummary } from '../lib/api';
 
 type DashboardSummary = {
   totalRevenue: number;
@@ -19,23 +19,44 @@ type DashboardSummary = {
   activeProjects: number;
   pendingConsultations: number;
   upcomingMeetings: number;
+  recentActivities: any[];
 };
 
 export default function AdminPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
+    const loadDashboardData = async () => {
       try {
-        const res = await safeGet<{ success: boolean; data: DashboardSummary }>('/api/admin/dashboard/summary');
-        if (res.data.success) {
-          setSummary(res.data.data);
+        const response = await fetchDashboardSummary();
+        if (response.success && response.data) {
+          setSummary(response.data);
         }
       } catch (err) {
-        console.error('Failed to load summary', err);
+        console.error('Failed to load dashboard summary', err);
+      } finally {
+        setLoading(false);
       }
-    })();
+    };
+    
+    loadDashboardData();
   }, []);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="bg-gray-800/50 rounded-xl p-6 animate-pulse">
+              <div className="h-4 bg-gray-700 rounded w-1/2 mb-2"></div>
+              <div className="h-8 bg-gray-700 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

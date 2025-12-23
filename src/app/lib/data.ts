@@ -853,5 +853,490 @@ export const fallbackCaseStudies = [
     results: "The Power BI dashboard provided leadership with a 360° view of retail performance, helping them identify their top-performing categories and most profitable customer segments.",
     technologies: ["Power BI", "Microsoft Excel", "DAX", "Data Modeling"],
     image: "/images/case-studies/superstore-sales-performance-dashboard.jpeg",
+  },
+];
+
+const fallbackProjects = [
+      {
+        name: "E-commerce Website Development",
+        client: "ABC Corporation",
+        status: "active",
+        priority: "high",
+        startDate: new Date("2024-01-15"),
+        endDate: new Date("2024-06-15"),
+        budget: 50000,
+        spent: 25000,
+        progress: 50,
+        team: ["john@company.com", "sarah@company.com"],
+        description: "Build a modern e-commerce platform with React and Node.js",
+        technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+        deliverables: ["Frontend Application", "Backend API", "Admin Dashboard"]
+      },
+      {
+        name: "Mobile App for Healthcare",
+        client: "MediCare Solutions", 
+        status: "planning",
+        priority: "medium",
+        startDate: new Date("2024-02-01"),
+        endDate: new Date("2024-08-01"),
+        budget: 75000,
+        spent: 0,
+        progress: 0,
+        team: ["mike@company.com", "lisa@company.com"],
+        description: "Develop a healthcare mobile app for patient management",
+        technologies: ["React Native", "Firebase", "Redux"],
+        deliverables: ["iOS App", "Android App", "Admin Panel"]
+      },
+      {
+        name: "Corporate Website Redesign",
+        client: "Global Tech Inc.",
+        status: "completed",
+        priority: "low", 
+        startDate: new Date("2023-11-01"),
+        endDate: new Date("2024-01-15"),
+        budget: 30000,
+        spent: 28000,
+        progress: 100,
+        team: ["alex@company.com"],
+        description: "Redesign and rebuild corporate website with modern UI/UX",
+        technologies: ["Next.js", "Tailwind CSS", "Contentful"],
+        deliverables: ["Website Design", "CMS Integration", "SEO Optimization"]
+      }
+    ];
+     const fallbackTeamMembers = [
+      {
+        name: "Debashish Roy",
+        email: "debashishroyapu@gmail.com",
+        role: "Senior Developer",
+        department: "Development",
+        position: "Team Lead",
+        phone: "+8801609045257",
+        status: "active",
+        joinDate: new Date("2025-08-20"),
+        skills: ["React", "Node.js", "TypeScript","Next.js", "MongoDB"],
+        projects: ["E-commerce Platform", "CRM System", "Mobile App"],
+        performance: 95
+      },
+      {
+        name: "Anmoy Sen",
+        email: "anmoysen02@gmail.com",
+        role: "Data Analytics",
+        department: "Data Science",
+        position: "Senior Data Sciencist",
+        phone: "+8801780891438",
+        status: "active",
+        joinDate: new Date("2025-09-20"),
+        skills: ["Figma", "Adobe XD", "Prototyping", "User Research"],
+        projects: ["Banking App", "Healthcare Portal", "E-commerce Platform"],
+        performance: 88
+      },
+      {
+        name: "Joykanto Roy",
+        email: "joykantoroy02@gmail.com",
+        role: "Digital Marketer",
+        department: "Marketing",
+        position: "Marketing Manager",
+        phone: "+8801313560023",
+        status: "active",
+        joinDate: new Date("2025-10-10"),
+        skills: ["SEO", "PPC", "Content Strategy", "Analytics"],
+        projects: ["SEO Campaign", "Social Media Strategy"],
+        performance: 92
+      },
+      {
+        name: "Antor Roy",
+        email: "antormisty@gmail.com",
+        role: "Sales Executive",
+        department: "Sales",
+        position: "Account Manager",
+        phone: "+8801519610931",
+        status: "on-leave",
+        joinDate: new Date("2025-10-31"),
+        skills: ["Client Relations", "Negotiation", "CRM", "Presentation"],
+        projects: ["Client Onboarding", "Partnership Development"],
+        performance: 85
+      },
+      {
+        name: "David Wilson",
+        email: "david.wilson@company.com",
+        role: "Project Manager",
+        department: "Management",
+        position: "Senior PM",
+        phone: "+1-555-0105",
+        status: "active",
+        joinDate: new Date("2022-11-15"),
+        skills: ["Agile", "Scrum", "Risk Management", "Budgeting"],
+        projects: ["All Projects"],
+        performance: 90
+      },
+      {
+        name: "Lisa Brown",
+        email: "lisa.brown@company.com",
+        role: "DevOps Engineer",
+        department: "Operations",
+        position: "Infrastructure Lead",
+        phone: "+1-555-0106",
+        status: "active",
+        joinDate: new Date("2023-05-20"),
+        skills: ["AWS", "Docker", "Kubernetes", "CI/CD"],
+        projects: ["Platform Infrastructure", "Deployment Pipeline"],
+        performance: 94
+      }
+    ];
+
+    // Client Seed Data
+    const fallbackClients = [
+      {
+        name: "Robert Taylor",
+        email: "robert.taylor@techcorp.com",
+        phone: "+1-555-0201",
+        company: "TechCorp Inc.",
+        industry: "Technology",
+        status: "active",
+        totalProjects: 5,
+        totalRevenue: 125000,
+        lastContact: new Date("2024-01-15"),
+        joinDate: new Date("2023-01-10"),
+        notes: "Enterprise client with ongoing projects"
+      },
+      {
+        name: "Jennifer Martinez",
+        email: "j.martinez@healthplus.com",
+        phone: "+1-555-0202",
+        company: "HealthPlus Solutions",
+        industry: "Healthcare",
+        status: "active",
+        totalProjects: 3,
+        totalRevenue: 75000,
+        lastContact: new Date("2024-01-10"),
+        joinDate: new Date("2023-03-15"),
+        notes: "Healthcare platform development"
+      },
+      {
+        name: "James Wilson",
+        email: "james.wilson@retailpro.com",
+        phone: "+1-555-0203",
+        company: "RetailPro",
+        industry: "E-Commerce",
+        status: "active",
+        totalProjects: 2,
+        totalRevenue: 45000,
+        lastContact: new Date("2024-01-12"),
+        joinDate: new Date("2023-05-20"),
+        notes: "E-commerce store development"
+      },
+      {
+        name: "Amanda Clark",
+        email: "amanda.clark@financegroup.com",
+        company: "Finance Group LLC",
+        industry: "Finance",
+        status: "lead",
+        totalProjects: 0,
+        totalRevenue: 0,
+        lastContact: new Date("2024-01-14"),
+        joinDate: new Date("2024-01-14"),
+        notes: "New lead - requires follow up"
+      },
+      {
+        name: "Michael Brown",
+        email: "m.brown@manufacturingco.com",
+        phone: "+1-555-0205",
+        company: "Manufacturing Co.",
+        industry: "Manufacturing",
+        status: "inactive",
+        totalProjects: 1,
+        totalRevenue: 25000,
+        lastContact: new Date("2023-11-20"),
+        joinDate: new Date("2023-06-10"),
+        notes: "Project completed - no ongoing work"
+      }
+    ];
+      // Financial Seed Data
+    const fallbackFinancialData = [
+      {
+        period: "2024-Q1",
+        dateRange: "last30Days",
+        summary: {
+          totalRevenue: 1542000,
+          totalProfit: 723500,
+          activeClients: 47,
+          newClients: 15,
+          avgProjectValue: 32800
+        },
+        revenueData: [
+          { month: "Jan", revenue: 485000, profit: 228000 },
+          { month: "Feb", revenue: 512000, profit: 240600 },
+          { month: "Mar", revenue: 545000, profit: 254900 }
+        ],
+        expenseData: [
+          { category: "Salaries", amount: 425000, color: "#0088FE" },
+          { category: "Marketing", amount: 185000, color: "#00C49F" },
+          { category: "Infrastructure", amount: 98000, color: "#FFBB28" },
+          { category: "Software", amount: 45000, color: "#FF8042" },
+          { category: "Operations", amount: 72000, color: "#8884D8" }
+        ],
+        clientAcquisitionData: [
+          { month: "Jan", newClients: 12, returning: 32 },
+          { month: "Feb", newClients: 18, returning: 35 },
+          { month: "Mar", newClients: 15, returning: 38 }
+        ],
+        cashFlow: {
+          inflow: 1542000,
+          outflow: 818500,
+          netCashFlow: 723500
+        },
+        accountsReceivable: {
+          current: 285000,
+          overdue: 45000,
+          total: 330000
+        },
+        profitMargin: 46.9
+      },
+      {
+        period: "2024-Q2",
+        dateRange: "last90Days",
+        summary: {
+          totalRevenue: 1685000,
+          totalProfit: 791000,
+          activeClients: 52,
+          newClients: 18,
+          avgProjectValue: 32400
+        },
+        revenueData: [
+          { month: "Apr", revenue: 525000, profit: 246700 },
+          { month: "May", revenue: 558000, profit: 262200 },
+          { month: "Jun", revenue: 602000, profit: 282100 }
+        ],
+        expenseData: [
+          { category: "Salaries", amount: 438000, color: "#0088FE" },
+          { category: "Marketing", amount: 198000, color: "#00C49F" },
+          { category: "Infrastructure", amount: 105000, color: "#FFBB28" },
+          { category: "Software", amount: 52000, color: "#FF8042" },
+          { category: "Operations", amount: 81000, color: "#8884D8" }
+        ],
+        clientAcquisitionData: [
+          { month: "Apr", newClients: 14, returning: 40 },
+          { month: "May", newClients: 16, returning: 42 },
+          { month: "Jun", newClients: 20, returning: 45 }
+        ],
+        cashFlow: {
+          inflow: 1685000,
+          outflow: 894000,
+          netCashFlow: 791000
+        },
+        accountsReceivable: {
+          current: 312000,
+          overdue: 38000,
+          total: 350000
+        },
+        profitMargin: 47.0
+      },
+      {
+        period: "2024-Q3",
+        dateRange: "last6Months",
+        summary: {
+          totalRevenue: 2450000,
+          totalProfit: 1151500,
+          activeClients: 58,
+          newClients: 25,
+          avgProjectValue: 33500
+        },
+        revenueData: [
+          { month: "Jul", revenue: 612000, profit: 287600 },
+          { month: "Aug", revenue: 645000, profit: 303100 },
+          { month: "Sep", revenue: 693000, profit: 325700 }
+        ],
+        expenseData: [
+          { category: "Salaries", amount: 452000, color: "#0088FE" },
+          { category: "Marketing", amount: 215000, color: "#00C49F" },
+          { category: "Infrastructure", amount: 118000, color: "#FFBB28" },
+          { category: "Software", amount: 58000, color: "#FF8042" },
+          { category: "Operations", amount: 92000, color: "#8884D8" }
+        ],
+        clientAcquisitionData: [
+          { month: "Jul", newClients: 18, returning: 48 },
+          { month: "Aug", newClients: 22, returning: 51 },
+          { month: "Sep", newClients: 25, returning: 55 }
+        ],
+        cashFlow: {
+          inflow: 2450000,
+          outflow: 1298500,
+          netCashFlow: 1151500
+        },
+        accountsReceivable: {
+          current: 365000,
+          overdue: 42000,
+          total: 407000
+        },
+        profitMargin: 47.0
+      },
+      {
+        period: "2024-Q4",
+        dateRange: "last12Months",
+        summary: {
+          totalRevenue: 3280000,
+          totalProfit: 1541600,
+          activeClients: 65,
+          newClients: 32,
+          avgProjectValue: 34200
+        },
+        revenueData: [
+          { month: "Oct", revenue: 725000, profit: 340700 },
+          { month: "Nov", revenue: 785000, profit: 368900 },
+          { month: "Dec", revenue: 845000, profit: 397100 }
+        ],
+        expenseData: [
+          { category: "Salaries", amount: 485000, color: "#0088FE" },
+          { category: "Marketing", amount: 245000, color: "#00C49F" },
+          { category: "Infrastructure", amount: 135000, color: "#FFBB28" },
+          { category: "Software", amount: 65000, color: "#FF8042" },
+          { category: "Operations", amount: 108000, color: "#8884D8" }
+        ],
+        clientAcquisitionData: [
+          { month: "Oct", newClients: 20, returning: 58 },
+          { month: "Nov", newClients: 24, returning: 62 },
+          { month: "Dec", newClients: 28, returning: 65 }
+        ],
+        cashFlow: {
+          inflow: 3280000,
+          outflow: 1738400,
+          netCashFlow: 1541600
+        },
+        accountsReceivable: {
+          current: 425000,
+          overdue: 35000,
+          total: 460000
+        },
+        profitMargin: 47.0
+      }
+    ];
+    const FallbackSchedules = [
+  {
+    name: "Debashish Roy",
+    email: "debashish@example.com",
+    phone: "+8801712345678",
+    company: "NextVision Technologies",
+    meetingType: "consultation",
+    preferredDate: new Date("2025-11-02T10:00:00.000Z"),
+    preferredTime: "10:00 AM",
+    timezone: "Asia/Dhaka",
+    message: "I’d like to discuss a new website development project.",
+    status: "pending",
+    meetingLink: "",
+    adminNotes: ""
+  },
+  {
+    name: "Ayesha Khan",
+    email: "ayesha.khan@example.com",
+    phone: "+8801811223344",
+    company: "BrightEdge Agency",
+    meetingType: "demo",
+    preferredDate: new Date("2025-11-03T15:30:00.000Z"),
+    preferredTime: "3:30 PM",
+    timezone: "Asia/Dhaka",
+    message: "I want to see a demo of your marketing analytics dashboard.",
+    status: "confirmed",
+    meetingLink: "https://meet.google.com/demo-session",
+    adminNotes: "Confirmed via email on Oct 26."
+  },
+  {
+    name: "Tanvir Hasan",
+    email: "tanvir.hasan@example.com",
+    phone: "+8801999887766",
+    company: "TechEdge Ltd.",
+    meetingType: "technical",
+    preferredDate: new Date("2025-11-05T09:00:00.000Z"),
+    preferredTime: "9:00 AM",
+    timezone: "Asia/Dhaka",
+    message: "Need technical consultation about API integration.",
+    status: "confirmed",
+    meetingLink: "https://zoom.us/j/987654321",
+    adminNotes: "Assigned engineer to handle API discussion."
+  },
+  {
+    name: "Mehedi Rahman",
+    email: "mehedi.rahman@example.com",
+    company: "SkySoft Digital",
+    meetingType: "sales",
+    preferredDate: new Date("2025-11-07T11:30:00.000Z"),
+    preferredTime: "11:30 AM",
+    timezone: "Asia/Dhaka",
+    message: "Looking to discuss enterprise pricing plans.",
+    status: "pending",
+    meetingLink: "",
+    adminNotes: ""
+  },
+  {
+    name: "Rafiul Islam",
+    email: "rafiul.islam@example.com",
+    phone: "+8801555333444",
+    company: "CreativeHive",
+    meetingType: "other",
+    preferredDate: new Date("2025-11-10T14:00:00.000Z"),
+    preferredTime: "2:00 PM",
+    timezone: "Asia/Dhaka",
+    message: "Discussing possible partnership opportunities.",
+    status: "completed",
+    meetingLink: "https://meet.google.com/rafiul-session",
+    adminNotes: "Meeting completed successfully. Follow-up next week."
   }
+];
+
+const fallbackConsultations = [
+  {
+    name: "Debashish Roy",
+    email: "debashish@example.com",
+    phone: "+8801712345678",
+    message: "I'm interested in scheduling a consultation about web development."
+  },
+  {
+    name: "Ayesha Khan",
+    email: "ayesha.khan@example.com",
+    phone: "+8801811223344",
+    message: "Can you help me plan a digital marketing strategy for my startup?"
+  },
+  {
+    name: "Tanvir Hasan",
+    email: "tanvir.hasan@example.com",
+    phone: "+8801999887766",
+    message: "I'd like to discuss mobile app development options."
+  },
+  {
+    name: "Mehedi Rahman",
+    email: "mehedi.rahman@example.com",
+    message: "Need guidance on choosing the right tech stack for a SaaS platform."
+  },
+  {
+    name: "Rafiul Islam",
+    email: "rafiul.islam@example.com",
+    phone: "+8801555333444",
+    message: "I want to get a consultation about optimizing website performance."
+  }
+];
+  const fallbackConsentData = [
+      {
+        consent: true,
+        timestamp: new Date("2024-01-15T10:30:00Z"),
+        userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      },
+      {
+        consent: true,
+        timestamp: new Date("2024-01-16T14:22:15Z"),
+        userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Safari/605.1.15"
+      }
+    ];
+    const Subscribers = [
+  {
+    email: 'john.doe@example.com',
+    name: 'John Doe',
+    isActive: true,
+    subscribedAt: new Date('2024-01-15')
+  },
+  {
+    email: 'sarah.smith@example.com',
+    name: 'Sarah Smith',
+    isActive: true,
+    subscribedAt: new Date('2024-01-20')
+  }
+
 ];

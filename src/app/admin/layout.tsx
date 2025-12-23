@@ -1,4 +1,3 @@
-// app/admin/layout.tsx - ENHANCED VERSION
 "use client";
 
 import { useAuth } from "../contexts/AuthContext";

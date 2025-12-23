@@ -1,121 +1,21 @@
-// api.ts - Complete version with all APIs (Fixed)
-import axios from "axios";
 import { 
   fallbackMenus, 
   fallbackSolutions, 
   fallbackIndustries, 
   fallbackBlogs, 
-  fallbackCaseStudies 
+  fallbackCaseStudies,
+  fallbackProjects,
+  fallbackTeamMembers,
+  fallbackClients,
+  fallbackFinancialData,
+  fallbackConsultations,
+  fallbackSchedules,
+  Subscribers,
+  fallbackConsentData
 } from './data';
 
-// ✅ Base API instance
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
-  headers: { "Content-Type": "application/json" },
-  withCredentials: true, 
-  timeout: 30000,
-});
+// ========== COMMON INTERFACES ==========
 
-// ✅ Request interceptor
-api.interceptors.request.use(async (config) => {
-  if (typeof window !== "undefined") {
-    try {
-      // Only use Firebase token for authenticated requests
-      if (config.url?.includes('/admin')) {
-        const { auth } = await import("./firebase");
-        const currentUser = auth.currentUser;
-        
-        if (currentUser) {
-          const token = await currentUser.getIdToken();
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-      }
-    } catch (err) {
-      console.error("Failed to attach token:", err);
-    }
-  }
-  return config;
-});
-
-// ✅ Response interceptor
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const url = error.config?.url;
-    const method = error.config?.method?.toUpperCase();
-    
-    console.error(`API Error - ${method} ${url}:`, {
-      status: error.response?.status,
-      message: error.response?.data?.message || error.message,
-    });
-
-    if (error.response?.status === 401) {
-      console.log("Unauthorized - Check authentication");
-    }
-
-    return Promise.reject(error);
-  }
-);
-
-// ✅ Safe API helpers
-async function safeGet<T>(url: string): Promise<T> {
-  try {
-    const res = await api.get<T>(url);
-    return res.data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
-    console.error(`GET ${url} failed:`, errorMessage);
-    throw new Error(errorMessage);
-  }
-}
-
-async function safePost<T>(url: string, data?: any): Promise<T> {
-  try {
-    const res = await api.post<T>(url, data);
-    return res.data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
-    console.error(`POST ${url} failed:`, errorMessage);
-    throw new Error(errorMessage);
-  }
-}
-
-async function safePut<T>(url: string, data?: any): Promise<T> {
-  try {
-    const res = await api.put<T>(url, data);
-    return res.data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
-    console.error(`PUT ${url} failed:`, errorMessage);
-    throw new Error(errorMessage);
-  }
-}
-
-async function safeDelete<T>(url: string): Promise<T> {
-  try {
-    const res = await api.delete<T>(url);
-    return res.data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
-    console.error(`DELETE ${url} failed:`, errorMessage);
-    throw new Error(errorMessage);
-  }
-}
-
-async function safePatch<T>(url: string, data?: any): Promise<T> {
-  try {
-    const res = await api.patch<T>(url, data);
-    return res.data;
-  } catch (err: any) {
-    const errorMessage = err.response?.data?.message || err.message || 'Unknown error';
-    console.error(`PATCH ${url} failed:`, errorMessage);
-    throw new Error(errorMessage);
-  }
-}
-
-// ========== PUBLIC APIS ==========
-
-// -------- Common Interfaces --------
 export interface ApiResponse<T = any> {
   success: boolean;
   message: string;
@@ -128,7 +28,25 @@ export interface ApiResponse<T = any> {
   };
 }
 
-// -------- Menu APIs --------
+// Simulate network delay
+const simulateDelay = (ms: number = 300) => 
+  new Promise(resolve => setTimeout(resolve, ms));
+
+// Generic success response
+const successResponse = <T>(data: T, message: string = 'Success'): ApiResponse<T> => ({
+  success: true,
+  message,
+  data
+});
+
+// Generic error response
+const errorResponse = (message: string = 'Error occurred'): ApiResponse => ({
+  success: false,
+  message
+});
+
+// ========== MENU APIs ==========
+
 export interface MenuItem {
   label: string;
   href: string;
@@ -146,43 +64,17 @@ export interface MenuGroup {
 }
 
 export const fetchMenus = async (): Promise<MenuGroup[]> => {
-  try {
-    const response = await safeGet<any>("/api/menus");
-    
-    // Handle different response formats
-    let menusData: MenuGroup[] = [];
-    
-    if (Array.isArray(response)) {
-      menusData = response;
-    } else if (response?.success && response?.data) {
-      menusData = response.data;
-    } else if (response?.menus) {
-      menusData = response.menus;
-    }
-    
-    if (menusData.length === 0) {
-      console.log('Using fallback menus data');
-      return fallbackMenus.map(menu => ({
-        ...menu,
-        _id: `menu-${menu.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    }
-    
-    return menusData;
-  } catch (error) {
-    console.error('Error fetching menus, using fallback:', error);
-    return fallbackMenus.map(menu => ({
-      ...menu,
-      _id: `menu-${menu.slug}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-  }
+  await simulateDelay();
+  return fallbackMenus.map(menu => ({
+    ...menu,
+    _id: `menu-${menu.slug}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
 };
 
-// -------- Solutions APIs --------
+// ========== SOLUTIONS APIs ==========
+
 export interface SolutionStep {
   title: string;
   description: string;
@@ -203,75 +95,31 @@ export interface Solution {
 }
 
 export const fetchSolutions = async (): Promise<Solution[]> => {
-  try {
-    const response = await safeGet<any>("/api/menus/solutions/items");
-    
-    let solutionsData: Solution[] = [];
-    
-    if (Array.isArray(response)) {
-      solutionsData = response;
-    } else if (response?.success && response?.data) {
-      solutionsData = response.data;
-    } else if (response?.solutions) {
-      solutionsData = response.solutions;
-    }
-    
-    if (solutionsData.length === 0) {
-      console.log('Using fallback solutions data');
-      return fallbackSolutions.map(solution => ({
-        ...solution,
-        _id: `solution-${solution.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    }
-    
-    return solutionsData;
-  } catch (error) {
-    console.error('Error fetching solutions, using fallback:', error);
-    return fallbackSolutions.map(solution => ({
-      ...solution,
-      _id: `solution-${solution.slug}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-  }
+  await simulateDelay();
+  return fallbackSolutions.map(solution => ({
+    ...solution,
+    _id: `solution-${solution.slug}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
 };
 
 export const fetchSolutionBySlug = async (slug: string): Promise<Solution> => {
-  try {
-    const response = await safeGet<any>(`/api/menus/solutions/items/${slug}`);
-    
-    if (response?.success && response?.data) {
-      return response.data;
-    }
-    // Find in fallback
-    const fallbackSolution = fallbackSolutions.find(s => s.slug === slug);
-    if (fallbackSolution) {
-      return {
-        ...fallbackSolution,
-        _id: `solution-${fallbackSolution.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    }
+  await simulateDelay();
+  const solution = fallbackSolutions.find(s => s.slug === slug);
+  if (!solution) {
     throw new Error('Solution not found');
-  } catch (error) {
-    console.error(`Error fetching solution ${slug}, checking fallback:`, error);
-    const fallbackSolution = fallbackSolutions.find(s => s.slug === slug);
-    if (fallbackSolution) {
-      return {
-        ...fallbackSolution,
-        _id: `solution-${fallbackSolution.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    }
-    throw error;
   }
+  return {
+    ...solution,
+    _id: `solution-${solution.slug}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 };
 
-// -------- Industries APIs --------
+// ========== INDUSTRIES APIs ==========
+
 export interface Industry {
   _id?: string;
   slug: string;
@@ -284,75 +132,31 @@ export interface Industry {
 }
 
 export const fetchIndustries = async (): Promise<Industry[]> => {
-  try {
-    const response = await safeGet<any>("/api/menus/industries/items");
-    
-    let industriesData: Industry[] = [];
-    
-    if (Array.isArray(response)) {
-      industriesData = response;
-    } else if (response?.success && response?.data) {
-      industriesData = response.data;
-    } else if (response?.industries) {
-      industriesData = response.industries;
-    }
-    
-    if (industriesData.length === 0) {
-      console.log('Using fallback industries data');
-      return fallbackIndustries.map(industry => ({
-        ...industry,
-        _id: `industry-${industry.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    }
-    
-    return industriesData;
-  } catch (error) {
-    console.error('Error fetching industries, using fallback:', error);
-    return fallbackIndustries.map(industry => ({
-      ...industry,
-      _id: `industry-${industry.slug}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-  }
+  await simulateDelay();
+  return fallbackIndustries.map(industry => ({
+    ...industry,
+    _id: `industry-${industry.slug}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
 };
 
 export const fetchIndustryBySlug = async (slug: string): Promise<Industry> => {
-  try {
-    const response = await safeGet<any>(`/api/menus/industries/items/${slug}`);
-    
-    if (response?.success && response?.data) {
-      return response.data;
-    }
-    // Find in fallback
-    const fallbackIndustry = fallbackIndustries.find(i => i.slug === slug);
-    if (fallbackIndustry) {
-      return {
-        ...fallbackIndustry,
-        _id: `industry-${fallbackIndustry.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    }
+  await simulateDelay();
+  const industry = fallbackIndustries.find(i => i.slug === slug);
+  if (!industry) {
     throw new Error('Industry not found');
-  } catch (error) {
-    console.error(`Error fetching industry ${slug}, checking fallback:`, error);
-    const fallbackIndustry = fallbackIndustries.find(i => i.slug === slug);
-    if (fallbackIndustry) {
-      return {
-        ...fallbackIndustry,
-        _id: `industry-${fallbackIndustry.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    }
-    throw error;
   }
+  return {
+    ...industry,
+    _id: `industry-${industry.slug}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 };
 
-// -------- Blog APIs --------
+// ========== BLOG APIs ==========
+
 export interface Blog {
   _id?: string;
   title: string;
@@ -371,77 +175,32 @@ export interface Blog {
 }
 
 export const fetchBlogs = async (): Promise<Blog[]> => {
-  try {
-    const response = await safeGet<any>("/api/blogs");
-    
-    let blogsData: Blog[] = [];
-    
-    if (Array.isArray(response)) {
-      blogsData = response;
-    } else if (response?.success && response?.data) {
-      blogsData = response.data;
-    } else if (response?.blogs) {
-      blogsData = response.blogs;
-    }
-    
-    if (blogsData.length === 0) {
-      console.log('Using fallback blogs data');
-      return fallbackBlogs.map((blog, index) => ({
-        ...blog,
-        _id: `blog-${blog.slug || index}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        publishedAt: blog.publishedAt || new Date().toISOString()
-      }));
-    }
-    
-    return blogsData;
-  } catch (error) {
-    console.error('Error fetching blogs, using fallback:', error);
-    return fallbackBlogs.map((blog, index) => ({
-      ...blog,
-      _id: `blog-${blog.slug || index}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      publishedAt: blog.publishedAt || new Date().toISOString()
-    }));
-  }
+  await simulateDelay();
+  return fallbackBlogs.map((blog, index) => ({
+    ...blog,
+    _id: `blog-${blog.slug || index}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    publishedAt: blog.publishedAt || new Date().toISOString()
+  }));
 };
 
 export const fetchBlogBySlug = async (slug: string): Promise<Blog> => {
-  try {
-    const response = await safeGet<any>(`/api/blogs/${slug}`);
-    
-    if (response?.success && response?.data) {
-      return response.data;
-    }
-    // Find in fallback
-    const fallbackBlog = fallbackBlogs.find(b => b.slug === slug);
-    if (fallbackBlog) {
-      return {
-        ...fallbackBlog,
-        _id: `blog-${fallbackBlog.slug}`,
-        createdAt: new Date().toISOString(),
-        publishedAt: fallbackBlog.publishedAt || new Date().toISOString()
-      };
-    }
+  await simulateDelay();
+  const blog = fallbackBlogs.find(b => b.slug === slug);
+  if (!blog) {
     throw new Error('Blog not found');
-  } catch (error) {
-    console.error(`Error fetching blog ${slug}, checking fallback:`, error);
-    const fallbackBlog = fallbackBlogs.find(b => b.slug === slug);
-    if (fallbackBlog) {
-      return {
-        ...fallbackBlog,
-        _id: `blog-${fallbackBlog.slug}`,
-        createdAt: new Date().toISOString(),
-        publishedAt: fallbackBlog.publishedAt || new Date().toISOString()
-      };
-    }
-    throw error;
   }
+  return {
+    ...blog,
+    _id: `blog-${blog.slug}`,
+    createdAt: new Date().toISOString(),
+    publishedAt: blog.publishedAt || new Date().toISOString()
+  };
 };
 
-// -------- Case Studies APIs --------
+// ========== CASE STUDIES APIs ==========
+
 export interface CaseStudy {
   _id?: string;
   title: string;
@@ -469,75 +228,31 @@ export interface CaseStudy {
 }
 
 export const fetchCaseStudies = async (): Promise<CaseStudy[]> => {
-  try {
-    const response = await safeGet<any>("/api/case-studies");
-    
-    let caseStudiesData: CaseStudy[] = [];
-    
-    if (Array.isArray(response)) {
-      caseStudiesData = response;
-    } else if (response?.success && response?.data) {
-      caseStudiesData = response.data;
-    } else if (response?.caseStudies) {
-      caseStudiesData = response.caseStudies;
-    }
-    
-    if (caseStudiesData.length === 0) {
-      console.log('Using fallback case studies data');
-      return fallbackCaseStudies.map((caseStudy, index) => ({
-        ...caseStudy,
-        _id: `case-study-${caseStudy.slug || index}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    }
-    
-    return caseStudiesData;
-  } catch (error) {
-    console.error('Error fetching case studies, using fallback:', error);
-    return fallbackCaseStudies.map((caseStudy, index) => ({
-      ...caseStudy,
-      _id: `case-study-${caseStudy.slug || index}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    }));
-  }
+  await simulateDelay();
+  return fallbackCaseStudies.map((caseStudy, index) => ({
+    ...caseStudy,
+    _id: `case-study-${caseStudy.slug || index}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
 };
 
 export const fetchCaseStudyBySlug = async (slug: string): Promise<CaseStudy> => {
-  try {
-    const response = await safeGet<any>(`/api/case-studies/${slug}`);
-    
-    if (response?.success && response?.data) {
-      return response.data;
-    }
-    // Find in fallback
-    const fallbackCaseStudy = fallbackCaseStudies.find(c => c.slug === slug);
-    if (fallbackCaseStudy) {
-      return {
-        ...fallbackCaseStudy,
-        _id: `case-study-${fallbackCaseStudy.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    }
+  await simulateDelay();
+  const caseStudy = fallbackCaseStudies.find(c => c.slug === slug);
+  if (!caseStudy) {
     throw new Error('Case study not found');
-  } catch (error) {
-    console.error(`Error fetching case study ${slug}, checking fallback:`, error);
-    const fallbackCaseStudy = fallbackCaseStudies.find(c => c.slug === slug);
-    if (fallbackCaseStudy) {
-      return {
-        ...fallbackCaseStudy,
-        _id: `case-study-${fallbackCaseStudy.slug}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-    }
-    throw error;
   }
+  return {
+    ...caseStudy,
+    _id: `case-study-${caseStudy.slug}`,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 };
 
-// -------- Consultation APIs (Public) --------
+// ========== CONSULTATION APIs ==========
+
 export interface Consultation {
   _id?: string;
   name: string;
@@ -564,10 +279,29 @@ export interface CreateConsultationData {
   message: string;
 }
 
-export const createConsultation = (data: CreateConsultationData): Promise<ApiResponse<Consultation>> => 
-  safePost("/api/consultations", data);
+export const createConsultation = async (data: CreateConsultationData): Promise<ApiResponse<Consultation>> => {
+  await simulateDelay();
+  const newConsultation: Consultation = {
+    ...data,
+    _id: `consult-${Date.now()}`,
+    status: 'new',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  // Store in fallbackConsultations (simulated)
+  fallbackConsultations.push({
+    name: data.name,
+    email: data.email,
+    phone: data.phone || '',
+    message: data.message
+  });
+  
+  return successResponse(newConsultation, 'Consultation submitted successfully');
+};
 
-// -------- Schedule APIs (Public) --------
+// ========== SCHEDULE APIs ==========
+
 export interface Schedule {
   _id?: string;
   name: string;
@@ -598,10 +332,22 @@ export interface CreateScheduleData {
   message?: string;
 }
 
-export const createSchedule = (data: CreateScheduleData): Promise<ApiResponse<Schedule>> => 
-  safePost("/api/schedules", data);
+export const createSchedule = async (data: CreateScheduleData): Promise<ApiResponse<Schedule>> => {
+  await simulateDelay();
+  const newSchedule: Schedule = {
+    ...data,
+    _id: `schedule-${Date.now()}`,
+    status: 'pending',
+    meetingType: (data.meetingType as Schedule['meetingType']) || 'consultation',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  return successResponse(newSchedule, 'Meeting scheduled successfully');
+};
 
-// -------- Newsletter Subscription --------
+// ========== NEWSLETTER APIs ==========
+
 export interface NewsletterSubscriber {
   _id?: string;
   email: string;
@@ -617,17 +363,22 @@ export interface CreateNewsletterData {
   name?: string;
 }
 
-export interface SubscriberStats {
-  totalSubscribers: number;
-  activeSubscribers: number;
-  todaySubscribers: number;
-}
+export const subscribeNewsletter = async (data: CreateNewsletterData): Promise<ApiResponse<NewsletterSubscriber>> => {
+  await simulateDelay();
+  const newSubscriber: NewsletterSubscriber = {
+    ...data,
+    _id: `subscriber-${Date.now()}`,
+    isActive: true,
+    subscribedAt: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  return successResponse(newSubscriber, 'Subscribed successfully');
+};
 
-// Public newsletter subscription
-export const subscribeNewsletter = (data: CreateNewsletterData): Promise<ApiResponse<NewsletterSubscriber>> => 
-  safePost("/api/newsletter/subscribe", data);
+// ========== CONSENT APIs ==========
 
-// -------- Consent APIs (Public) --------
 export interface ConsentRecord {
   _id?: string;
   consent: boolean;
@@ -638,36 +389,17 @@ export interface ConsentRecord {
   updatedAt?: string;
 }
 
-export interface ConsentStats {
-  total: number;
-  accepted: number;
-  declined: number;
-  acceptanceRate: string;
-  dailyBreakdown: {
-    _id: string;
-    accepted: number;
-    declined: number;
-    total: number;
-  }[];
-}
-
-export interface ConsentPagination {
-  currentPage: number;
-  totalPages: number;
-  totalRecords: number;
-}
-
-// Public Consent API
-export const recordConsent = (data: {
+export const recordConsent = async (data: {
   consent: boolean;
   timestamp: string;
   userAgent: string;
-}): Promise<ApiResponse> =>
-  safePost("/api/consent", data);
+}): Promise<ApiResponse> => {
+  await simulateDelay();
+  return successResponse(null, 'Consent recorded');
+};
 
-// ========== ADMIN APIS ==========
+// ========== ADMIN APIs ==========
 
-// -------- Admin Auth --------
 export interface AdminUser {
   uid: string;
   email: string;
@@ -680,76 +412,39 @@ export interface AdminLoginResponse {
   admin?: AdminUser;
 }
 
+// Simulate admin login (always successful for demo)
 export const adminLogin = async (email: string, password: string): Promise<AdminLoginResponse> => {
-  try {
-    const { auth } = await import("./firebase");
-    const { signInWithEmailAndPassword } = await import("firebase/auth");
-    
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const user = userCredential.user;
-    const token = await user.getIdToken();
-    
-    // Verify admin role with backend
-    const response = await api.post("/api/auth/login", { idToken: token });
-    const result = response.data;
-    
-    if (!result.success) {
-      throw new Error(result.message || 'Admin access denied');
+  await simulateDelay(1000);
+  return {
+    success: true,
+    message: "Admin login successful",
+    admin: {
+      uid: 'admin-001',
+      email: email,
+      role: 'admin'
     }
-
-    return {
-      success: true,
-      message: "Admin login successful",
-      admin: result.admin
-    };
-  } catch (error: any) {
-    console.error("Admin login error:", error);
-    return {
-      success: false,
-      message: error.message || "Login failed"
-    };
-  }
+  };
 };
 
 export const adminLogout = async (): Promise<ApiResponse> => {
-  try {
-    const { auth } = await import("./firebase");
-    const { signOut } = await import("firebase/auth");
-    
-    await signOut(auth);
-    
-    return {
-      success: true,
-      message: "Logout successful"
-    };
-  } catch (error: any) {
-    console.error("Logout error:", error);
-    return {
-      success: false,
-      message: error.message || "Logout failed"
-    };
-  }
+  await simulateDelay();
+  return successResponse(null, 'Logout successful');
 };
 
 export const verifyAdmin = async (): Promise<{success: boolean; admin: any}> => {
-  try {
-    const { auth } = await import("./firebase");
-    const currentUser = auth.currentUser;
-    
-    if (!currentUser) {
-      return { success: false, admin: null };
+  await simulateDelay();
+  return { 
+    success: true, 
+    admin: {
+      uid: 'admin-001',
+      email: 'admin@example.com',
+      role: 'admin'
     }
-    
-    const token = await currentUser.getIdToken();
-    const response = await api.post("/api/auth/verify", { idToken: token });
-    return response.data;
-  } catch (error) {
-    console.error("Verify admin error:", error);
-    return { success: false, admin: null };
-  }
+  };
 };
 
-// -------- Dashboard Summary --------
+// ========== DASHBOARD APIs ==========
+
 export interface DashboardSummary {
   totalRevenue: number;
   totalClients: number;
@@ -759,10 +454,23 @@ export interface DashboardSummary {
   recentActivities: any[];
 }
 
-export const fetchDashboardSummary = (): Promise<ApiResponse<DashboardSummary>> => 
-  safeGet("/api/admin/dashboard/summary");
+export const fetchDashboardSummary = async (): Promise<ApiResponse<DashboardSummary>> => {
+  await simulateDelay();
+  
+  const summary: DashboardSummary = {
+    totalRevenue: 3280000,
+    totalClients: fallbackClients.length,
+    activeProjects: fallbackProjects.filter(p => p.status === 'active').length,
+    pendingConsultations: fallbackConsultations.length,
+    upcomingMeetings: fallbackSchedules.filter(s => s.status === 'pending' || s.status === 'confirmed').length,
+    recentActivities: []
+  };
+  
+  return successResponse(summary);
+};
 
-// -------- Project Management --------
+// ========== PROJECT APIs ==========
+
 export interface Project {
   _id?: string;
   name: string;
@@ -782,40 +490,37 @@ export interface Project {
   updatedAt?: string;
 }
 
-export interface CreateProjectData {
-  name: string;
-  client: string;
-  status?: string;
-  priority?: string;
-  startDate: string;
-  endDate: string;
-  budget?: number;
-  spent?: number;
-  progress?: number;
-  team?: string[];
-  description?: string;
-  technologies?: string[];
-  deliverables?: string[];
-}
+// Helper function to convert string status to Project status type
+const toProjectStatus = (status: string): Project['status'] => {
+  const validStatuses: Project['status'][] = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
+  return validStatuses.includes(status as any) ? (status as Project['status']) : 'planning';
+};
 
-export interface UpdateProjectData extends Partial<CreateProjectData> {}
+// Helper function to convert string priority to Project priority type
+const toProjectPriority = (priority: string): Project['priority'] => {
+  const validPriorities: Project['priority'][] = ['low', 'medium', 'high', 'critical'];
+  return validPriorities.includes(priority as any) ? (priority as Project['priority']) : 'medium';
+};
 
-export const fetchProjects = (): Promise<ApiResponse<Project[]>> => 
-  safeGet("/api/admin/projects");
+export const fetchProjects = async (): Promise<ApiResponse<Project[]>> => {
+  await simulateDelay();
+  
+  const projects: Project[] = fallbackProjects.map(project => ({
+    ...project,
+    _id: `project-${project.name.toLowerCase().replace(/\s+/g, '-')}`,
+    startDate: project.startDate.toISOString(),
+    endDate: project.endDate.toISOString(),
+    status: toProjectStatus(project.status),
+    priority: toProjectPriority(project.priority),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+  
+  return successResponse(projects);
+};
 
-export const fetchProjectById = (id: string): Promise<ApiResponse<Project>> => 
-  safeGet(`/api/admin/projects/${id}`);
+// ========== CLIENT APIs ==========
 
-export const createProject = (data: CreateProjectData): Promise<ApiResponse<Project>> => 
-  safePost("/api/admin/projects", data);
-
-export const updateProject = (id: string, data: UpdateProjectData): Promise<ApiResponse<Project>> => 
-  safePut(`/api/admin/projects/${id}`, data);
-
-export const deleteProject = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/projects/${id}`);
-
-// -------- Client Management --------
 export interface Client {
   _id?: string;
   name: string;
@@ -833,36 +538,30 @@ export interface Client {
   updatedAt?: string;
 }
 
-export interface CreateClientData {
-  name: string;
-  email: string;
-  phone?: string;
-  company: string;
-  industry: string;
-  status?: string;
-  totalProjects?: number;
-  totalRevenue?: number;
-  notes?: string;
-}
+// Helper function to convert string status to Client status type
+const toClientStatus = (status: string): Client['status'] => {
+  const validStatuses: Client['status'][] = ['active', 'inactive', 'lead'];
+  return validStatuses.includes(status as any) ? (status as Client['status']) : 'lead';
+};
 
-export interface UpdateClientData extends Partial<CreateClientData> {}
+export const fetchClients = async (): Promise<ApiResponse<Client[]>> => {
+  await simulateDelay();
+  
+  const clients: Client[] = fallbackClients.map(client => ({
+    ...client,
+    _id: `client-${client.email.split('@')[0]}`,
+    lastContact: client.lastContact.toISOString(),
+    joinDate: client.joinDate.toISOString(),
+    status: toClientStatus(client.status),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+  
+  return successResponse(clients);
+};
 
-export const fetchClients = (): Promise<ApiResponse<Client[]>> => 
-  safeGet("/api/admin/clients");
+// ========== TEAM APIs ==========
 
-export const fetchClientById = (id: string): Promise<ApiResponse<Client>> => 
-  safeGet(`/api/admin/clients/${id}`);
-
-export const createClient = (data: CreateClientData): Promise<ApiResponse<Client>> => 
-  safePost("/api/admin/clients", data);
-
-export const updateClient = (id: string, data: UpdateClientData): Promise<ApiResponse<Client>> => 
-  safePut(`/api/admin/clients/${id}`, data);
-
-export const deleteClient = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/clients/${id}`);
-
-// -------- Team Management --------
 export interface TeamMember {
   _id?: string;
   name: string;
@@ -881,156 +580,214 @@ export interface TeamMember {
   updatedAt?: string;
 }
 
-export interface CreateTeamMemberData {
-  name: string;
-  email: string;
-  role: string;
-  department: string;
-  position: string;
-  phone?: string;
-  avatar?: string;
-  status?: string;
-  skills?: string[];
-  projects?: string[];
-  performance?: number;
-}
+// Helper function to convert string status to TeamMember status type
+const toTeamMemberStatus = (status: string): TeamMember['status'] => {
+  const validStatuses: TeamMember['status'][] = ['active', 'inactive', 'on-leave'];
+  return validStatuses.includes(status as any) ? (status as TeamMember['status']) : 'active';
+};
 
-export interface UpdateTeamMemberData extends Partial<CreateTeamMemberData> {}
+export const fetchTeamMembers = async (): Promise<ApiResponse<TeamMember[]>> => {
+  await simulateDelay();
+  
+  const teamMembers: TeamMember[] = fallbackTeamMembers.map(member => ({
+    ...member,
+    _id: `team-${member.email.split('@')[0]}`,
+    joinDate: member.joinDate.toISOString(),
+    status: toTeamMemberStatus(member.status),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+  
+  return successResponse(teamMembers);
+};
 
-export const fetchTeamMembers = (): Promise<ApiResponse<TeamMember[]>> => 
-  safeGet("/api/admin/team");
+// ========== FINANCIAL APIs ==========
 
-export const fetchTeamMemberById = (id: string): Promise<ApiResponse<TeamMember>> => 
-  safeGet(`/api/admin/team/${id}`);
-
-export const createTeamMember = (data: CreateTeamMemberData): Promise<ApiResponse<TeamMember>> => 
-  safePost("/api/admin/team", data);
-
-export const updateTeamMember = (id: string, data: UpdateTeamMemberData): Promise<ApiResponse<TeamMember>> => 
-  safePut(`/api/admin/team/${id}`, data);
-
-export const deleteTeamMember = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/team/${id}`);
-
-// -------- Financial Analytics --------
-export interface FinancialSummary {
-  totalRevenue: number;
-  totalExpenses: number;
-  netProfit: number;
-  totalClients: number;
-  activeProjects: number;
-  completedProjects: number;
+export interface FinancialData {
+  period: string;
+  dateRange: string;
+  summary: {
+    totalRevenue: number;
+    totalProfit: number;
+    activeClients: number;
+    newClients: number;
+    avgProjectValue: number;
+  };
+  revenueData: Array<{ month: string; revenue: number; profit: number }>;
+  expenseData: Array<{ category: string; amount: number; color: string }>;
+  clientAcquisitionData: Array<{ month: string; newClients: number; returning: number }>;
+  cashFlow: {
+    inflow: number;
+    outflow: number;
+    netCashFlow: number;
+  };
+  accountsReceivable: {
+    current: number;
+    overdue: number;
+    total: number;
+  };
   profitMargin: number;
 }
 
-export interface RevenueByMonth {
-  month: string;
-  revenue: number;
-}
-
-export interface ExpenseBreakdown {
-  category: string;
-  amount: number;
-}
-
-export interface ClientGrowth {
-  month: string;
-  count: number;
-}
-
-export interface TopClient {
-  client: string;
-  revenue: number;
-}
-
-export interface ProjectPerformance {
-  status: string;
-  count: number;
-}
-
-export interface FinancialData {
-  summary: FinancialSummary;
-  revenueByMonth: RevenueByMonth[];
-  expenseBreakdown: ExpenseBreakdown[];
-  clientGrowth: ClientGrowth[];
-  topClients: TopClient[];
-  projectPerformance: ProjectPerformance[];
-}
-
-export const fetchFinancialData = (dateRange: string = 'monthly'): Promise<ApiResponse<FinancialData>> => 
-  safeGet(`/api/admin/financial?dateRange=${dateRange}`);
-
-// -------- Consent Admin APIs --------
-export const fetchConsentStats = (range: string = 'all'): Promise<ApiResponse<ConsentStats>> =>
-  safeGet(`/api/admin/consent/stats?range=${range}`);
-
-export const fetchConsentRecords = (
-  page: number = 1, 
-  limit: number = 20
-): Promise<ApiResponse<{
-  records: ConsentRecord[];
-  pagination: ConsentPagination;
-}>> =>
-  safeGet(`/api/admin/consent/records?page=${page}&limit=${limit}`);
-
-export const deleteConsentRecord = (id: string): Promise<ApiResponse> =>
-  safeDelete(`/api/admin/consent/records/${id}`);
-
-export const exportConsentData = (format: 'csv' | 'excel' = 'csv'): Promise<Blob> =>
-  api.get(`/api/admin/consent/export?format=${format}`, { responseType: 'blob' });
-
-// -------- Consultation Admin APIs --------
-export const fetchAdminConsultations = (): Promise<ApiResponse<Consultation[]>> =>
-  safeGet("/api/admin/consultations");
-
-export const updateConsultationStatus = (id: string, status: string): Promise<ApiResponse<Consultation>> =>
-  safePut(`/api/admin/consultations/${id}`, { status });
-
-export const deleteConsultation = (id: string): Promise<ApiResponse> =>
-  safeDelete(`/api/admin/consultations/${id}`);
-
-// -------- Schedule Admin APIs --------
-export interface UpdateScheduleData {
-  status: string;
-  meetingLink?: string;
-  adminNotes?: string;
-}
-
-export const fetchAdminSchedules = (status?: string): Promise<ApiResponse<Schedule[]>> => {
-  const url = status && status !== 'all' 
-    ? `/api/admin/schedules?status=${status}`
-    : '/api/admin/schedules';
-  return safeGet(url);
+export const fetchFinancialData = async (dateRange: string = 'monthly'): Promise<ApiResponse<FinancialData>> => {
+  await simulateDelay();
+  
+  // Find the matching data based on dateRange
+  let financialData: FinancialData;
+  
+  switch(dateRange) {
+    case 'last30Days':
+      financialData = fallbackFinancialData[0]; // Q1
+      break;
+    case 'last90Days':
+      financialData = fallbackFinancialData[1]; // Q2
+      break;
+    case 'last6Months':
+      financialData = fallbackFinancialData[2]; // Q3
+      break;
+    case 'last12Months':
+      financialData = fallbackFinancialData[3]; // Q4
+      break;
+    default:
+      financialData = fallbackFinancialData[0]; // Default to Q1
+  }
+  
+  return successResponse(financialData);
 };
 
-export const updateAdminScheduleStatus = (id: string, data: UpdateScheduleData): Promise<ApiResponse<Schedule>> => 
-  safePut(`/api/admin/schedules/${id}`, data);
+// ========== CONSULTATION ADMIN APIs ==========
 
-export const deleteAdminSchedule = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/schedules/${id}`);
+export const fetchAdminConsultations = async (): Promise<ApiResponse<Consultation[]>> => {
+  await simulateDelay();
+  const consultations: Consultation[] = fallbackConsultations.map((consult, index) => ({
+    name: consult.name,
+    email: consult.email,
+    phone: consult.phone || '',
+    message: consult.message,
+    _id: `consult-${index}`,
+    status: 'new',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+  
+  return successResponse(consultations);
+};
 
-// -------- Newsletter Admin APIs --------
-export const getSubscribers = (
+// ========== SCHEDULE ADMIN APIs ==========
+
+// Helper function to convert string meetingType to Schedule meetingType type
+const toScheduleMeetingType = (meetingType: string): Schedule['meetingType'] => {
+  const validTypes: Schedule['meetingType'][] = ['consultation', 'demo', 'technical', 'sales', 'other'];
+  return validTypes.includes(meetingType as any) ? (meetingType as Schedule['meetingType']) : 'consultation';
+};
+
+// Helper function to convert string status to Schedule status type
+const toScheduleStatus = (status: string): Schedule['status'] => {
+  const validStatuses: Schedule['status'][] = ['pending', 'confirmed', 'cancelled', 'completed'];
+  return validStatuses.includes(status as any) ? (status as Schedule['status']) : 'pending';
+};
+
+export const fetchAdminSchedules = async (status?: string): Promise<ApiResponse<Schedule[]>> => {
+  await simulateDelay();
+  
+  let schedules: Schedule[] = fallbackSchedules.map(schedule => ({
+    ...schedule,
+    _id: `schedule-${schedule.name.toLowerCase().replace(/\s+/g, '-')}`,
+    preferredDate: schedule.preferredDate.toISOString(),
+    meetingType: toScheduleMeetingType(schedule.meetingType),
+    status: toScheduleStatus(schedule.status),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+  
+  if (status && status !== 'all') {
+    schedules = schedules.filter(s => s.status === status);
+  }
+  
+  return successResponse(schedules);
+};
+
+// ========== NEWSLETTER ADMIN APIs ==========
+
+export const getSubscribers = async (
   page: number = 1,
   limit: number = 10,
   search: string = ''
 ): Promise<ApiResponse<NewsletterSubscriber[]>> => {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-    ...(search && { search })
-  });
+  await simulateDelay();
   
-  return safeGet(`/api/admin/newsletter/subscribers?${params}`);
+  let subscribers: NewsletterSubscriber[] = Subscribers.map(sub => ({
+    ...sub,
+    _id: `subscriber-${sub.email}`,
+    subscribedAt: sub.subscribedAt.toISOString(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }));
+  
+  if (search) {
+    subscribers = subscribers.filter(s => 
+      s.email.toLowerCase().includes(search.toLowerCase()) ||
+      (s.name && s.name.toLowerCase().includes(search.toLowerCase()))
+    );
+  }
+  
+  return successResponse(subscribers);
 };
 
-export const deleteSubscriber = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/newsletter/subscribers/${id}`);
+// ========== CONSENT ADMIN APIs ==========
 
-export const getSubscriberStats = (): Promise<ApiResponse<SubscriberStats>> => 
-  safeGet('/api/admin/newsletter/subscribers/stats');
+export interface ConsentStats {
+  total: number;
+  accepted: number;
+  declined: number;
+  acceptanceRate: string;
+}
 
-// -------- Activity APIs --------
+export const fetchConsentStats = async (range: string = 'all'): Promise<ApiResponse<ConsentStats>> => {
+  await simulateDelay();
+  
+  const stats: ConsentStats = {
+    total: fallbackConsentData.length,
+    accepted: fallbackConsentData.filter(c => c.consent).length,
+    declined: fallbackConsentData.filter(c => !c.consent).length,
+    acceptanceRate: `${((fallbackConsentData.filter(c => c.consent).length / fallbackConsentData.length) * 100).toFixed(1)}%`
+  };
+  
+  return successResponse(stats);
+};
+
+// ========== STATS APIs ==========
+
+export interface StatsData {
+  _id?: string;
+  happyClients: number;
+  projectsDone: number;
+  clientSatisfaction: number;
+  totalRevenue: number;
+  lastUpdated: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export const getStats = async (): Promise<ApiResponse<StatsData>> => {
+  await simulateDelay();
+  
+  const stats: StatsData = {
+    happyClients: 150,
+    projectsDone: 85,
+    clientSatisfaction: 98,
+    totalRevenue: 3280000,
+    lastUpdated: new Date().toISOString(),
+    _id: 'stats-001',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  
+  return successResponse(stats);
+};
+
+// ========== ACTIVITY APIs ==========
+
 export interface Activity {
   id: string;
   type: string;
@@ -1044,190 +801,351 @@ export interface Activity {
   isRead: boolean;
 }
 
-export const fetchRecentActivities = (): Promise<ApiResponse<Activity[]>> => 
-  safeGet("/api/admin/activities/recent");
-
-export const fetchAllActivities = (
-  page: number = 1, 
-  limit: number = 20, 
-  type?: string
-): Promise<ApiResponse<Activity[]>> => {
-  const params = new URLSearchParams({
-    page: page.toString(),
-    limit: limit.toString(),
-    ...(type && type !== 'all' && { type })
-  });
+export const fetchRecentActivities = async (): Promise<ApiResponse<Activity[]>> => {
+  await simulateDelay();
   
-  return safeGet(`/api/admin/activities?${params}`);
+  const activities: Activity[] = [
+    {
+      id: 'activity-1',
+      type: 'project',
+      title: 'New Project Started',
+      description: 'E-commerce website development project has started',
+      timestamp: new Date().toISOString(),
+      icon: '🚀',
+      color: 'blue',
+      user: 'John Doe',
+      priority: 'high',
+      isRead: false
+    },
+    {
+      id: 'activity-2',
+      type: 'client',
+      title: 'New Client Onboarded',
+      description: 'TechCorp Inc. has become a new client',
+      timestamp: new Date(Date.now() - 3600000).toISOString(),
+      icon: '👥',
+      color: 'green',
+      user: 'Sarah Smith',
+      priority: 'medium',
+      isRead: true
+    },
+    {
+      id: 'activity-3',
+      type: 'finance',
+      title: 'Payment Received',
+      description: 'Payment of $25,000 received from RetailPro',
+      timestamp: new Date(Date.now() - 7200000).toISOString(),
+      icon: '💰',
+      color: 'purple',
+      user: 'Finance Team',
+      priority: 'high',
+      isRead: false
+    }
+  ];
+  
+  return successResponse(activities);
 };
 
-export const fetchUnreadActivitiesCount = (): Promise<ApiResponse<{ count: number }>> => 
-  safeGet("/api/admin/activities/unread/count");
+// ========== EXPORT/REPORT APIs ==========
 
-export const markActivityAsRead = (id: string): Promise<ApiResponse<Activity>> => 
-  safePut(`/api/admin/activities/${id}/read`, {});
+// Export data (simulated)
+export const exportData = async (type: string, format: string): Promise<Blob> => {
+  await simulateDelay(1000);
+  
+  // Create a dummy blob
+  const content = `Exported ${type} data in ${format} format`;
+  return new Blob([content], { type: 'text/plain' });
+};
 
-export const markAllActivitiesAsRead = (): Promise<ApiResponse> => 
-  safePut("/api/admin/activities/read-all", {});
+// Send report (simulated)
+export const sendWeeklyReport = async (): Promise<ApiResponse> => {
+  await simulateDelay(1500);
+  return successResponse(null, 'Weekly report sent successfully');
+};
 
-// -------- Content Management (Solutions Admin) --------
-export interface CreateSolutionData {
-  title: string;
-  slug: string;
-  subtitle?: string;
-  description?: string;
-  heroImage?: string;
-  workflow?: SolutionStep[];
-  expertise?: SolutionStep[];
-  deliverables?: { item: string; description: string }[];
-}
+export const sendMonthlyReport = async (): Promise<ApiResponse> => {
+  await simulateDelay(1500);
+  return successResponse(null, 'Monthly report sent successfully');
+};
 
-export interface UpdateSolutionData extends Partial<CreateSolutionData> {}
+// ========== CONTENT MANAGEMENT APIs ==========
 
-export const fetchAdminSolutions = (): Promise<ApiResponse<Solution[]>> => 
-  safeGet("/api/admin/solutions");
+// For admin content management - using fallback data
+export const fetchAdminSolutions = async (): Promise<ApiResponse<Solution[]>> => {
+  await simulateDelay();
+  return successResponse(await fetchSolutions());
+};
 
-export const createSolution = (data: CreateSolutionData): Promise<ApiResponse<Solution>> => 
-  safePost("/api/admin/solutions", data);
+export const fetchAdminIndustries = async (): Promise<ApiResponse<Industry[]>> => {
+  await simulateDelay();
+  return successResponse(await fetchIndustries());
+};
 
-export const updateSolution = (id: string, data: UpdateSolutionData): Promise<ApiResponse<Solution>> => 
-  safePut(`/api/admin/solutions/${id}`, data);
+export const fetchAdminBlogs = async (): Promise<ApiResponse<Blog[]>> => {
+  await simulateDelay();
+  return successResponse(await fetchBlogs());
+};
 
-export const deleteSolution = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/solutions/${id}`);
+export const fetchAdminCaseStudies = async (): Promise<ApiResponse<CaseStudy[]>> => {
+  await simulateDelay();
+  return successResponse(await fetchCaseStudies());
+};
 
-// -------- Content Management (Industries Admin) --------
-export interface CreateIndustryData {
-  title: string;
-  slug: string;
-  overview?: string;
-  challenges?: { title: string; description: string }[];
-  solutions?: { title: string; description: string }[];
-}
+// Note: Create, update, and delete operations are simulated and don't persist
+// In a real app, these would modify the fallback data arrays
 
-export interface UpdateIndustryData extends Partial<CreateIndustryData> {}
+// Simulate success responses for admin operations
+export const createSolution = async (data: any): Promise<ApiResponse<Solution>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `solution-${Date.now()}` }, 'Solution created successfully');
+};
 
-export const fetchAdminIndustries = (): Promise<ApiResponse<Industry[]>> => 
-  safeGet("/api/admin/industries");
+export const updateSolution = async (id: string, data: any): Promise<ApiResponse<Solution>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Solution updated successfully');
+};
 
-export const createIndustry = (data: CreateIndustryData): Promise<ApiResponse<Industry>> => 
-  safePost("/api/admin/industries", data);
+export const deleteSolution = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Solution deleted successfully');
+};
 
-export const updateIndustry = (id: string, data: UpdateIndustryData): Promise<ApiResponse<Industry>> => 
-  safePut(`/api/admin/industries/${id}`, data);
+// Same pattern for other entities...
+export const createIndustry = async (data: any): Promise<ApiResponse<Industry>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `industry-${Date.now()}` }, 'Industry created successfully');
+};
 
-export const deleteIndustry = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/industries/${id}`);
+export const createBlogPost = async (data: any): Promise<ApiResponse<Blog>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `blog-${Date.now()}` }, 'Blog post created successfully');
+};
 
-// -------- Blog Admin APIs --------
-export interface CreateBlogData {
-  title: string;
-  slug: string;
-  excerpt: string;
-  content: string;
-  contentHtml: string;
-  image?: string;
-  author?: string;
-  category?: string;
-  status?: 'draft' | 'published';
-  tags?: string[];
-}
+export const createCaseStudy = async (data: any): Promise<ApiResponse<CaseStudy>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `case-study-${Date.now()}` }, 'Case study created successfully');
+};
 
-export interface UpdateBlogData extends Partial<CreateBlogData> {}
+export const createProject = async (data: any): Promise<ApiResponse<Project>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `project-${Date.now()}` }, 'Project created successfully');
+};
 
-export const fetchAdminBlogs = (): Promise<ApiResponse<Blog[]>> => 
-  safeGet("/api/admin/blogs");
+export const createClient = async (data: any): Promise<ApiResponse<Client>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `client-${Date.now()}` }, 'Client created successfully');
+};
 
-export const createBlogPost = (data: CreateBlogData): Promise<ApiResponse<Blog>> => 
-  safePost("/api/admin/blogs", data);
+export const createTeamMember = async (data: any): Promise<ApiResponse<TeamMember>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: `team-${Date.now()}` }, 'Team member created successfully');
+};
 
-export const updateBlogPost = (id: string, data: UpdateBlogData): Promise<ApiResponse<Blog>> => 
-  safePut(`/api/admin/blogs/${id}`, data);
+// Update operations
+export const updateIndustry = async (id: string, data: any): Promise<ApiResponse<Industry>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Industry updated successfully');
+};
 
-export const deleteBlogPost = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/blogs/${id}`);
+export const updateBlogPost = async (id: string, data: any): Promise<ApiResponse<Blog>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Blog post updated successfully');
+};
 
-// -------- Case Study Admin APIs --------
-export interface CreateCaseStudyData {
-  title: string;
-  slug: string;
-  description?: string;
-  results?: string;
-  image?: string;
-  industry?: string;
-  client?: string;
-  challenge?: string;
-  solution?: string;
-  technologies?: string[];
-  status?: 'draft' | 'published';
-  projectDuration?: string;
-  teamSize?: number;
-  budget?: number;
-  testimonial?: {
-    quote: string;
-    author: string;
-    position: string;
-  };
-  gallery?: string[];
-}
+export const updateCaseStudy = async (id: string, data: any): Promise<ApiResponse<CaseStudy>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Case study updated successfully');
+};
 
-export interface UpdateCaseStudyData extends Partial<CreateCaseStudyData> {}
+export const updateProject = async (id: string, data: any): Promise<ApiResponse<Project>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Project updated successfully');
+};
 
-export const fetchAdminCaseStudies = (): Promise<ApiResponse<CaseStudy[]>> => 
-  safeGet("/api/admin/case-studies");
+export const updateClient = async (id: string, data: any): Promise<ApiResponse<Client>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Client updated successfully');
+};
 
-export const createCaseStudy = (data: CreateCaseStudyData): Promise<ApiResponse<CaseStudy>> => 
-  safePost("/api/admin/case-studies", data);
+export const updateTeamMember = async (id: string, data: any): Promise<ApiResponse<TeamMember>> => {
+  await simulateDelay(1000);
+  return successResponse({ ...data, _id: id }, 'Team member updated successfully');
+};
 
-export const updateCaseStudy = (id: string, data: UpdateCaseStudyData): Promise<ApiResponse<CaseStudy>> => 
-  safePut(`/api/admin/case-studies/${id}`, data);
+// Delete operations
+export const deleteIndustry = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Industry deleted successfully');
+};
 
-export const deleteCaseStudy = (id: string): Promise<ApiResponse> => 
-  safeDelete(`/api/admin/case-studies/${id}`);
+export const deleteBlogPost = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Blog post deleted successfully');
+};
 
-// -------- Export Management APIs --------
-export const exportData = (type: 'projects' | 'clients' | 'financial' | 'blogs' | 'case-studies', format: 'pdf' | 'csv' | 'excel'): Promise<Blob> => 
-  api.get(`/api/admin/export/${type}?format=${format}`, { responseType: 'blob' });
+export const deleteCaseStudy = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Case study deleted successfully');
+};
 
-// -------- Report APIs --------
-export const sendWeeklyReport = (): Promise<ApiResponse> => 
-  safePost("/api/admin/reports/weekly", {});
+export const deleteProject = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Project deleted successfully');
+};
 
-export const sendMonthlyReport = (): Promise<ApiResponse> => 
-  safePost("/api/admin/reports/monthly", {});
+export const deleteClient = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Client deleted successfully');
+};
 
-// -------- Stats APIs --------
-export interface StatsData {
-  _id?: string;
-  happyClients: number;
-  projectsDone: number;
-  clientSatisfaction: number;
-  totalRevenue: number;
-  lastUpdated: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
+export const deleteTeamMember = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Team member deleted successfully');
+};
 
-export interface UpdateStatsData {
-  happyClients?: number;
-  projectsDone?: number;
-  clientSatisfaction?: number;
-  totalRevenue?: number;
-}
+// For consultation and schedule admin operations
+export const updateConsultationStatus = async (id: string, status: string): Promise<ApiResponse<Consultation>> => {
+  await simulateDelay(1000);
+  return successResponse({
+    _id: id,
+    status: status as 'new' | 'contacted' | 'in-progress' | 'completed',
+    name: 'Sample Client',
+    email: 'client@example.com',
+    message: 'Test consultation',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }, 'Consultation status updated');
+};
 
-// Get stats (Public)
-export const getStats = (): Promise<ApiResponse<StatsData>> => 
-  safeGet("/api/stats");
+export const deleteConsultation = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Consultation deleted');
+};
 
-// Update stats (Admin only)
-export const updateStats = (data: UpdateStatsData): Promise<ApiResponse<StatsData>> => 
-  safePut("/api/admin/stats/update", data);
+export const updateAdminScheduleStatus = async (id: string, data: any): Promise<ApiResponse<Schedule>> => {
+  await simulateDelay(1000);
+  return successResponse({
+    _id: id,
+    ...data,
+    name: 'Sample User',
+    email: 'user@example.com',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  } as Schedule, 'Schedule updated');
+};
 
-// Simulate new order (Admin only) - For testing
-export const simulateNewOrder = (): Promise<ApiResponse<StatsData>> => 
-  safePost("/api/admin/stats/simulate-order", {});
+export const deleteAdminSchedule = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Schedule deleted');
+};
 
-// Export the safe functions
-export { safeGet, safePost, safePut, safeDelete, safePatch };
+export const deleteSubscriber = async (id: string): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'Subscriber deleted');
+};
 
-export default api;
+export const markActivityAsRead = async (id: string): Promise<ApiResponse<Activity>> => {
+  await simulateDelay(1000);
+  return successResponse({
+    id,
+    type: 'project',
+    title: 'Activity',
+    description: 'Test activity',
+    timestamp: new Date().toISOString(),
+    icon: '📝',
+    color: 'blue',
+    isRead: true,
+    priority: 'medium'
+  }, 'Activity marked as read');
+};
+
+export const markAllActivitiesAsRead = async (): Promise<ApiResponse> => {
+  await simulateDelay(1000);
+  return successResponse(null, 'All activities marked as read');
+};
+
+export const simulateNewOrder = async (): Promise<ApiResponse<StatsData>> => {
+  await simulateDelay(1000);
+  const stats = await getStats();
+  return stats;
+};
+
+// Export all APIs for use in the application
+export default {
+  // Public APIs
+  fetchMenus,
+  fetchSolutions,
+  fetchSolutionBySlug,
+  fetchIndustries,
+  fetchIndustryBySlug,
+  fetchBlogs,
+  fetchBlogBySlug,
+  fetchCaseStudies,
+  fetchCaseStudyBySlug,
+  createConsultation,
+  createSchedule,
+  subscribeNewsletter,
+  recordConsent,
+  getStats,
+  
+  // Admin Auth
+  adminLogin,
+  adminLogout,
+  verifyAdmin,
+  
+  // Admin Dashboard
+  fetchDashboardSummary,
+  fetchProjects,
+  fetchClients,
+  fetchTeamMembers,
+  fetchFinancialData,
+  fetchAdminConsultations,
+  fetchAdminSchedules,
+  getSubscribers,
+  fetchConsentStats,
+  fetchRecentActivities,
+  
+  // Admin Content Management
+  fetchAdminSolutions,
+  fetchAdminIndustries,
+  fetchAdminBlogs,
+  fetchAdminCaseStudies,
+  
+  // CRUD Operations
+  createSolution,
+  updateSolution,
+  deleteSolution,
+  createIndustry,
+  updateIndustry,
+  deleteIndustry,
+  createBlogPost,
+  updateBlogPost,
+  deleteBlogPost,
+  createCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy,
+  createProject,
+  updateProject,
+  deleteProject,
+  createClient,
+  updateClient,
+  deleteClient,
+  createTeamMember,
+  updateTeamMember,
+  deleteTeamMember,
+  
+  // Other admin operations
+  updateConsultationStatus,
+  deleteConsultation,
+  updateAdminScheduleStatus,
+  deleteAdminSchedule,
+  deleteSubscriber,
+  markActivityAsRead,
+  markAllActivitiesAsRead,
+  
+  // Export/Report
+  exportData,
+  sendWeeklyReport,
+  sendMonthlyReport,
+  simulateNewOrder
+};
