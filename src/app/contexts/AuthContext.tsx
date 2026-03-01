@@ -1,29 +1,36 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { 
-  User, 
-  onAuthStateChanged, 
-  signOut,
-  signInWithEmailAndPassword 
-} from "firebase/auth";
-import { auth } from "../lib/firebase";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { api } from "../lib/api";
 
-interface AdminUser {
-  uid: string;
-  email: string | null;
-  name: string | null;
-  role: "admin" | "super_admin";
+// =============================================================================
+// TYPES
+// =============================================================================
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "super_admin" | "viewer";
 }
 
 interface AuthContextType {
-  user: User | null;
-  admin: AdminUser | null;
+  user: AdminUser | null;
   loading: boolean;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  error?: string | null;
 }
+
+// =============================================================================
+// CONTEXT
+// =============================================================================
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -33,104 +40,85 @@ export const useAuth = () => {
   return context;
 };
 
+// =============================================================================
+// HELPER — MongoDB _id → id normalize
+// =============================================================================
+
+// MongoDB _id এবং toJSON() এর id দুটোই handle করে।
+// Backend Mongoose toJSON() transform না থাকলে _id আসে, থাকলে id আসে।
+const normalizeUser = (raw: any): AdminUser | null => {
+  if (!raw) return null;
+  const id = raw.id ?? raw._id?.toString?.() ?? raw._id;
+  if (!id || !raw.email) return null;
+  return {
+    id,
+    name: raw.name ?? "",
+    email: raw.email,
+    role: raw.role as AdminUser["role"],
+  };
+};
+
+// =============================================================================
+// PROVIDER
+// =============================================================================
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [admin, setAdmin] = useState<AdminUser | null>(null);
+  const [user, setUser] = useState<AdminUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Firebase login function
-  const login = async (email: string, password: string) => {
+  // ── Login ──────────────────────────────────────────────────────────────────
+  // Flow: api.login() → POST /auth/login → backend sets refreshToken cookie
+  // Response unwrapped by api.post(): { user: { _id/id, name, email, role } }
+  const login = async (email: string, password: string): Promise<void> => {
     try {
       setError(null);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
-      
-      // Call backend to verify admin and set cookie
-      const response = await fetch('/api/admin/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idToken }),
-      });
-
-      const result = await response.json();
-      
-      if (!result.success) {
-        throw new Error(result.message || 'Admin access denied');
-      }
-
-      // Set admin data from backend response
-      if (result.admin) {
-        setAdmin(result.admin);
-      }
-      
+      const response = await api.login({ email, password });
+      // response = AuthResponse = { user: {...} }
+      const normalized = normalizeUser(response?.user);
+      if (!normalized) throw new Error("Invalid response from server");
+      setUser(normalized);
     } catch (err: any) {
-      console.error('Login error:', err);
-      setError(err.message || 'Login failed');
-      throw err;
+      const message = err.message || "Login failed";
+      setError(message);
+      throw new Error(message);
     }
   };
 
-  // Logout function
-  const logout = async () => {
+  // ── Logout ─────────────────────────────────────────────────────────────────
+  // Flow: POST /auth/logout → backend clears cookie (token দরকার নেই)
+  const logout = async (): Promise<void> => {
     try {
-      await signOut(auth);
-      await fetch('/api/admin/logout', { method: 'POST' });
-      setAdmin(null);
+      await api.logout();
+    } catch {
+      // Cookie already expired হলেও user logout করতে পারবে
+    } finally {
       setUser(null);
-    } catch (err) {
-      console.error('Logout failed:', err);
-      setError('Logout failed');
+      setError(null);
     }
   };
 
+  // ── Check Auth on Load ─────────────────────────────────────────────────────
+  // Flow: GET /auth/me → backend verifies refreshToken cookie → returns user
+  // Response unwrapped by api.get(): User object directly (no { user: } wrapper)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      
-      if (currentUser) {
-        try {
-          const idToken = await currentUser.getIdToken();
-          const tokenResult = await currentUser.getIdTokenResult();
-          const role = tokenResult.claims.role;
-
-          if (role === "admin" || role === "super_admin") {
-            setAdmin({
-              uid: currentUser.uid,
-              email: currentUser.email,
-              name: currentUser.displayName || currentUser.email,
-              role: role as "admin" | "super_admin",
-            });
-          } else {
-            setAdmin(null);
-          }
-        } catch (err) {
-          console.error('Role verification failed:', err);
-          setAdmin(null);
-        }
-      } else {
-        setAdmin(null);
+    const checkAuth = async () => {
+      try {
+        const userData = await api.getCurrentUser();
+        // userData = User = { _id/id, name, email, role, ... }
+        setUser(normalizeUser(userData));
+      } catch {
+        // 401 = not logged in
+        setUser(null);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    };
+    checkAuth();
   }, []);
 
-  const value = {
-    user,
-    admin,
-    loading,
-    login,
-    logout,
-    error,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, error, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

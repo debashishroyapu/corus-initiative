@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { fetchBlogs, Blog } from "../lib/api";
-import { getBlogImages } from "../lib/blog-images";
+import { getBlogs, Blog } from "../lib/api";
 import { motion } from "framer-motion";
 
 export default function BlogPage() {
@@ -16,11 +15,11 @@ export default function BlogPage() {
 
   useEffect(() => {
     const loadBlogs = async () => {
-      const data = await fetchBlogs();
+      const data = await getBlogs();
 
       const blogsWithImages = data.map((b) => ({
         ...b,
-        image: getBlogImages(b.slug),
+        image: `/images/blogs/${b.slug}.jpg`,
       }));
 
       setBlogs(blogsWithImages);
@@ -99,6 +98,9 @@ export default function BlogPage() {
                 <img
                   src={blog.image}
                   alt={blog.title}
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = "/images/blogs/default.jpg";
+                  }}
                   className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
@@ -139,21 +141,21 @@ export default function BlogPage() {
           </div>
         )}
 
-        {/* ✅ CTA Section */}
+        {/* CTA Section */}
         <div className="text-center bg-gradient-to-r from-blue-600/20 via-cyan-500/20 to-indigo-600/20 py-16 px-8 mt-20 rounded-3xl border border-white/10 shadow-lg backdrop-blur-md">
           <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-white">
             Have a Story to Share or Need Expert Insights?
           </h2>
           <p className="text-gray-300 mb-8 max-w-2xl mx-auto">
             Whether you're looking to collaborate or learn more about the latest in digital innovation,
-            we’re here to help your ideas take shape.
+            we're here to help your ideas take shape.
           </p>
           <motion.a
             whileHover={{ scale: 1.05 }}
             href="/contact"
             className="inline-block px-8 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 hover:opacity-90 transition-all text-white shadow-md"
           >
-            Let’s Connect →
+            Let's Connect →
           </motion.a>
         </div>
       </div>

@@ -1,104 +1,77 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { getStats, updateStats, simulateNewOrder } from '../../lib/api';
+import { safeGet } from '../../lib/api';
 
-export interface StatsData {
-  _id?: string;
-  happyClients: number;
-  projectsDone: number;
-  clientSatisfaction: number;
-  totalRevenue: number;
-  lastUpdated: string;
-  createdAt?: string;
-  updatedAt?: string;
+interface DashboardCounts {
+  blogs: number;
+  caseStudies: number;
+  solutions: number;
+  industries: number;
+  projects: number;
+  clients: number;
+  teamMembers: number;
+  schedules: number;
+  consultations: number;
+  subscribers: number;
+}
+
+interface DashboardPerformance {
+  activeProjects: number;
+  completedProjects: number;
+  activeClients: number;
+  pendingSchedules: number;
+  pendingConsultations: number;
+  projectCompletionRate: number;
+}
+
+interface DashboardStats {
+  counts: DashboardCounts;
+  performance: DashboardPerformance;
 }
 
 export default function StatsManagement() {
-  const { admin } = useAuth();
-  const [stats, setStats] = useState<StatsData | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [updating, setUpdating] = useState(false);
-  const [manualUpdate, setManualUpdate] = useState({
-    happyClients: 0,
-    projectsDone: 0,
-    clientSatisfaction: 0,
-    totalRevenue: 0
-  });
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStats = async () => {
     try {
       setLoading(true);
-      const result = await getStats();
-      
-      if (result.success && result.data) {
-        setStats(result.data);
+      setError(null);
+      const result = await safeGet<DashboardStats>('/stats/dashboard');
+      if (result) {
+        setStats(result);
+      } else {
+        setError('Failed to load stats');
       }
-    } catch (error) {
-      console.error('Failed to fetch stats:', error);
+    } catch (err: any) {
+      console.error('Failed to fetch stats:', err);
+      setError(err.message || 'Failed to fetch stats');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateStats = async (incrementData: any) => {
-    try {
-      setUpdating(true);
-      const result = await updateStats(incrementData);
-      
-      if (result.success) {
-        await fetchStats(); // Refresh stats
-        setManualUpdate({ happyClients: 0, projectsDone: 0, clientSatisfaction: 0, totalRevenue: 0 });
-        alert('Stats updated successfully!');
-      } else {
-        alert(result.message || 'Failed to update stats');
-      }
-    } catch (error) {
-      console.error('Failed to update stats:', error);
-      alert('Failed to update stats');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleSimulateNewOrder = async () => {
-    try {
-      setUpdating(true);
-      const result = await simulateNewOrder();
-      
-      if (result.success) {
-        await fetchStats(); // Refresh stats
-        alert('New order simulated successfully!');
-      } else {
-        alert(result.message || 'Failed to simulate order');
-      }
-    } catch (error) {
-      console.error('Failed to simulate order:', error);
-      alert('Failed to simulate order');
-    } finally {
-      setUpdating(false);
-    }
-  };
-
-  const handleManualUpdate = () => {
-    if (manualUpdate.happyClients > 0 || manualUpdate.projectsDone > 0 || 
-        manualUpdate.clientSatisfaction > 0 || manualUpdate.totalRevenue > 0) {
-      handleUpdateStats(manualUpdate);
-    } else {
-      alert('Please enter at least one value to update');
-    }
-  };
-
+  // ✅ authLoading শেষ হওয়ার পর user থাকলেই fetch করো
   useEffect(() => {
-    fetchStats();
-  }, []);
+    if (!authLoading && user) fetchStats();
+  }, [user, authLoading]);
 
-  if (!admin) {
+  if (authLoading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto"></div>
+        <p className="mt-2 text-gray-600">Checking auth...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
     return (
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div className="text-red-600 text-center py-8">
-          Unauthorized access
-        </div>
+        <div className="text-red-600 text-center py-8">Unauthorized access</div>
       </div>
     );
   }
@@ -112,134 +85,100 @@ export default function StatsManagement() {
     );
   }
 
+  if (error) {
+    return (
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="text-red-600 text-center py-8">
+          {error}
+          <button onClick={fetchStats} className="ml-4 px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm">
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {/* Current Stats Display */}
+      {/* Content Counts */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold mb-4">Current Statistics</h3>
-        {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <p className="text-2xl font-bold text-blue-600">{stats.happyClients}</p>
-              <p className="text-sm text-blue-600">Happy Clients</p>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-              <p className="text-2xl font-bold text-green-600">{stats.projectsDone}</p>
-              <p className="text-sm text-green-600">Projects Done</p>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <p className="text-2xl font-bold text-purple-600">{stats.clientSatisfaction}%</p>
-              <p className="text-sm text-purple-600">Satisfaction</p>
-            </div>
-            <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
-              <p className="text-2xl font-bold text-orange-600">${(stats.totalRevenue / 1000).toFixed(0)}K</p>
-              <p className="text-sm text-orange-600">Total Revenue</p>
-            </div>
+        <h3 className="text-lg font-semibold mb-4">Content Overview</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-2xl font-bold text-blue-600">{stats?.counts.clients ?? 0}</p>
+            <p className="text-sm text-blue-600">Clients</p>
           </div>
-        )}
-        <p className="text-xs text-gray-500 mt-4">
-          Last updated: {stats ? new Date(stats.lastUpdated).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-          }) : 'N/A'}
-        </p>
-      </div>
-
-      {/* Manual Update Section */}
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold mb-4">Manual Update</h3>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Happy Clients
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={manualUpdate.happyClients}
-              onChange={(e) => setManualUpdate(prev => ({
-                ...prev,
-                happyClients: parseInt(e.target.value) || 0
-              }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="0"
-            />
+          <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-2xl font-bold text-green-600">{stats?.counts.projects ?? 0}</p>
+            <p className="text-sm text-green-600">Projects</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Projects
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={manualUpdate.projectsDone}
-              onChange={(e) => setManualUpdate(prev => ({
-                ...prev,
-                projectsDone: parseInt(e.target.value) || 0
-              }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              placeholder="0"
-            />
+          <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <p className="text-2xl font-bold text-purple-600">{stats?.counts.teamMembers ?? 0}</p>
+            <p className="text-sm text-purple-600">Team Members</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Satisfaction (%)
-            </label>
-            <input
-              type="number"
-              min="0"
-              max="100"
-              value={manualUpdate.clientSatisfaction}
-              onChange={(e) => setManualUpdate(prev => ({
-                ...prev,
-                clientSatisfaction: parseInt(e.target.value) || 0
-              }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-              placeholder="0"
-            />
+          <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200">
+            <p className="text-2xl font-bold text-orange-600">{stats?.counts.blogs ?? 0}</p>
+            <p className="text-sm text-orange-600">Blogs</p>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Revenue ($)
-            </label>
-            <input
-              type="number"
-              min="0"
-              value={manualUpdate.totalRevenue}
-              onChange={(e) => setManualUpdate(prev => ({
-                ...prev,
-                totalRevenue: parseInt(e.target.value) || 0
-              }))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              placeholder="0"
-            />
+          <div className="text-center p-4 bg-pink-50 rounded-lg border border-pink-200">
+            <p className="text-2xl font-bold text-pink-600">{stats?.counts.subscribers ?? 0}</p>
+            <p className="text-sm text-pink-600">Subscribers</p>
           </div>
         </div>
-        <button
-          onClick={handleManualUpdate}
-          disabled={updating}
-          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition duration-200"
-        >
-          {updating ? 'Updating...' : 'Update Stats'}
-        </button>
       </div>
 
-      {/* Simulate New Order */}
+      {/* Performance Metrics */}
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold mb-4">Simulate New Order</h3>
-        <p className="text-gray-600 mb-4">
-          Click below to simulate a new order completion. This will automatically increment all stats with random values.
-        </p>
-        <button
-          onClick={handleSimulateNewOrder}
-          disabled={updating}
-          className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200"
-        >
-          {updating ? 'Processing...' : 'Simulate New Order'}
-        </button>
+        <h3 className="text-lg font-semibold mb-4">Performance</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-2xl font-bold text-green-600">{stats?.performance.activeProjects ?? 0}</p>
+            <p className="text-sm text-green-600">Active Projects</p>
+          </div>
+          <div className="text-center p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-2xl font-bold text-gray-600">{stats?.performance.completedProjects ?? 0}</p>
+            <p className="text-sm text-gray-600">Completed Projects</p>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-2xl font-bold text-blue-600">{stats?.performance.activeClients ?? 0}</p>
+            <p className="text-sm text-blue-600">Active Clients</p>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p className="text-2xl font-bold text-yellow-600">{stats?.performance.pendingSchedules ?? 0}</p>
+            <p className="text-sm text-yellow-600">Pending Schedules</p>
+          </div>
+          <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p className="text-2xl font-bold text-yellow-600">{stats?.performance.pendingConsultations ?? 0}</p>
+            <p className="text-sm text-yellow-600">Pending Consultations</p>
+          </div>
+          <div className="text-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+            <p className="text-2xl font-bold text-indigo-600">
+              {stats?.performance.projectCompletionRate?.toFixed(1) ?? 0}%
+            </p>
+            <p className="text-sm text-indigo-600">Completion Rate</p>
+          </div>
+        </div>
+      </div>
+
+      {/* All Counts */}
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 className="text-lg font-semibold mb-4">All Data Counts</h3>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {stats?.counts && Object.entries(stats.counts).map(([key, value]) => (
+            <div key={key} className="text-center p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <p className="text-xl font-bold text-gray-700">{value}</p>
+              <p className="text-xs text-gray-500 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 text-right">
+          <button
+            onClick={fetchStats}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm transition duration-200"
+          >
+            Refresh Stats
+          </button>
+        </div>
       </div>
     </div>
   );

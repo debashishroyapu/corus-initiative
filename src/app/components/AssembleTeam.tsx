@@ -4,10 +4,10 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const teamRoles = [
-  { title: "Web Developer & SEO Consultant", img: "/images/Team/Debashish.png" },
-  { title: "Data Analyst", img: "/images/Team/Anmoy.png" },
-  { title: "Digital Marketer", img: "/images/Team/Joykanto.png" },
-  { title: "Graphics Designer", img: "/images/Team/Antor.png" },
+  { title: "Web Developer & SEO Consultant", img: "/images/Team/Debashish.jpg" },
+  { title: "Data Analyst", img: "/images/Team/Anmoy.jpg" },
+  { title: "Digital Marketer", img: "/images/Team/Joykanto.jpg" },
+  { title: "Graphics Designer", img: "/images/Team/Antor.jpg" },
 ];
 
 export default function AssembleTeam() {

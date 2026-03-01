@@ -1,20 +1,28 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { safeGet } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { safeGet } from '../../lib/api';
 
-// Type definitions
 interface RevenueData {
   month: string;
   revenue: number;
+  profit?: number;
 }
 
-interface FinancialResponse {
-  success: boolean;
-  data: {
-    revenueByMonth: RevenueData[];
+interface Financial {
+  _id: string;
+  period: string;
+  revenueData: RevenueData[];
+  summary: {
+    totalRevenue: number;
+    totalProfit: number;
   };
+}
+
+// ✅ Controller getFinancialData returns { financialData: [] }
+interface FinancialListResponse {
+  financialData: Financial[];
 }
 
 export default function Analytics() {
@@ -28,14 +36,19 @@ export default function Analytics() {
 
     (async () => {
       try {
-        const res = await safeGet<FinancialResponse>('/api/admin/financial?dateRange=monthly');
-        if (res.success) {
-          setData(res.data.revenueByMonth);
+        const res = await safeGet<FinancialListResponse>('/admin/financial');
+        if (res?.financialData && res.financialData.length > 0) {
+          // সবচেয়ে recent financial record থেকে revenueData নাও
+          const revenueData = res.financialData[0].revenueData.map((item) => ({
+            month: item.month,
+            revenue: item.revenue,
+            profit: item.profit,
+          }));
+          setData(revenueData);
         } else {
-          setError('Failed to load analytics data');
+          setError('No financial data available');
         }
       } catch (err) {
-        console.error('Analytics load failed', err);
         setError('Failed to load analytics');
       } finally {
         setLoading(false);
@@ -76,26 +89,20 @@ export default function Analytics() {
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <h3 className="text-lg font-semibold mb-4">Revenue (Monthly)</h3>
       {data && data.length > 0 ? (
-        <div style={{ height: 220 }}>
-          <ResponsiveContainer width="100%" height="100%">
+        <div style={{ width: '100%', height: 220, minHeight: 220 }}>
+          <ResponsiveContainer width="100%" height={220}>
             <LineChart data={data}>
-              <XAxis 
-                dataKey="month" 
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis 
-                tick={{ fontSize: 12 }}
-                tickFormatter={(value) => `$${value}`}
-              />
-              <Tooltip 
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+              <Tooltip
                 formatter={(value) => [`$${value}`, 'Revenue']}
                 labelFormatter={(label) => `Month: ${label}`}
               />
-              <Line 
-                type="monotone" 
-                dataKey="revenue" 
-                stroke="#4f46e5" 
-                strokeWidth={2} 
+              <Line
+                type="monotone"
+                dataKey="revenue"
+                stroke="#4f46e5"
+                strokeWidth={2}
                 dot={{ fill: '#4f46e5', strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, fill: '#3730a3' }}
               />

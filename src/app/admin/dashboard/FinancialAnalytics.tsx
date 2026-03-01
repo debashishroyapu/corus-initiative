@@ -5,22 +5,26 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface FinancialSummary {
   totalRevenue: number;
-  totalExpenses: number;
-  netProfit: number;
-  profitMargin: number;
-  totalClients?: number;
-  activeProjects?: number;
+  totalProfit: number;
+  activeClients: number;
+  newClients: number;
+  avgProjectValue: number;
 }
 
-interface FinancialResponse {
-  success: boolean;
-  data: {
-    summary: FinancialSummary;
+interface Financial {
+  _id: string;
+  period: string;
+  summary: FinancialSummary;
+  profitMargin: number;
+  cashFlow: {
+    inflow: number;
+    outflow: number;
+    netCashFlow: number;
   };
 }
 
 export default function FinancialAnalytics() {
-  const [financialData, setFinancialData] = useState<FinancialSummary | null>(null);
+  const [financial, setFinancial] = useState<Financial | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
@@ -30,15 +34,15 @@ export default function FinancialAnalytics() {
 
     (async () => {
       try {
-        const res = await safeGet<FinancialResponse>('/api/admin/financial?dateRange=monthly');
-        if (res.success) {
-          setFinancialData(res.data.summary);
+        // Backend returns { financialData: Financial[] }
+        const res = await safeGet<{ financialData: Financial[] }>('/admin/financial');
+        if (res?.financialData && res.financialData.length > 0) {
+          setFinancial(res.financialData[0]);
           setError(null);
         } else {
-          setError('Failed to load financial data');
+          setError('No financial data available');
         }
       } catch (err: any) {
-        console.error('Financial fetch failed:', err);
         setError(err.message || 'Failed to load financial data');
       } finally {
         setLoading(false);
@@ -68,64 +72,78 @@ export default function FinancialAnalytics() {
     return (
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h3 className="text-lg font-semibold mb-4">Financial Summary</h3>
-        <div className="text-red-600 text-center py-8">{error}</div>
+        <div className="text-gray-500 text-center py-8">{error}</div>
       </div>
     );
   }
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h3 className="text-lg font-semibold mb-4">Financial Summary</h3>
-      
-      {financialData ? (
+      <h3 className="text-lg font-semibold mb-4">
+        Financial Summary
+        {financial?.period && <span className="text-sm font-normal text-gray-500 ml-2">({financial.period})</span>}
+      </h3>
+
+      {financial ? (
         <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-green-50 p-4 rounded-lg border border-green-100">
               <div className="text-sm text-green-800 font-medium mb-1">Total Revenue</div>
               <div className="text-xl font-bold text-green-600">
-                ${financialData.totalRevenue?.toLocaleString() || 0}
+                ${financial.summary.totalRevenue?.toLocaleString() || 0}
               </div>
             </div>
-            
-            <div className="bg-red-50 p-4 rounded-lg border border-red-100">
-              <div className="text-sm text-red-800 font-medium mb-1">Total Expenses</div>
-              <div className="text-xl font-bold text-red-600">
-                ${financialData.totalExpenses?.toLocaleString() || 0}
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
+              <div className="text-sm text-blue-800 font-medium mb-1">Total Profit</div>
+              <div className="text-xl font-bold text-blue-600">
+                ${financial.summary.totalProfit?.toLocaleString() || 0}
               </div>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-              <div className="text-sm text-blue-800 font-medium mb-1">Net Profit</div>
-              <div className="text-xl font-bold text-blue-600">
-                ${financialData.netProfit?.toLocaleString() || 0}
-              </div>
-            </div>
-            
             <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
               <div className="text-sm text-purple-800 font-medium mb-1">Profit Margin</div>
               <div className="text-xl font-bold text-purple-600">
-                {financialData.profitMargin?.toFixed(1) || 0}%
+                {financial.profitMargin?.toFixed(1) || 0}%
+              </div>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg border border-orange-100">
+              <div className="text-sm text-orange-800 font-medium mb-1">Avg Project Value</div>
+              <div className="text-xl font-bold text-orange-600">
+                ${financial.summary.avgProjectValue?.toLocaleString() || 0}
               </div>
             </div>
           </div>
-          
-          {(financialData.totalClients !== undefined || financialData.activeProjects !== undefined) && (
-            <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
-              {financialData.totalClients !== undefined && (
-                <div className="text-center">
-                  <div className="text-sm text-gray-600">Total Clients</div>
-                  <div className="text-lg font-semibold text-gray-800">{financialData.totalClients}</div>
+
+          <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-100">
+            <div className="text-center">
+              <div className="text-sm text-gray-600">Active Clients</div>
+              <div className="text-lg font-semibold text-gray-800">{financial.summary.activeClients || 0}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-600">New Clients</div>
+              <div className="text-lg font-semibold text-gray-800">{financial.summary.newClients || 0}</div>
+            </div>
+          </div>
+
+          {financial.cashFlow && (
+            <div className="pt-2 border-t border-gray-100">
+              <div className="text-sm font-medium text-gray-700 mb-2">Cash Flow</div>
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center p-2 bg-green-50 rounded">
+                  <div className="text-xs text-gray-500">Inflow</div>
+                  <div className="text-sm font-semibold text-green-600">${financial.cashFlow.inflow?.toLocaleString() || 0}</div>
                 </div>
-              )}
-              
-              {financialData.activeProjects !== undefined && (
-                <div className="text-center">
-                  <div className="text-sm text-gray-600">Active Projects</div>
-                  <div className="text-lg font-semibold text-gray-800">{financialData.activeProjects}</div>
+                <div className="text-center p-2 bg-red-50 rounded">
+                  <div className="text-xs text-gray-500">Outflow</div>
+                  <div className="text-sm font-semibold text-red-600">${financial.cashFlow.outflow?.toLocaleString() || 0}</div>
                 </div>
-              )}
+                <div className="text-center p-2 bg-blue-50 rounded">
+                  <div className="text-xs text-gray-500">Net</div>
+                  <div className="text-sm font-semibold text-blue-600">${financial.cashFlow.netCashFlow?.toLocaleString() || 0}</div>
+                </div>
+              </div>
             </div>
           )}
         </div>

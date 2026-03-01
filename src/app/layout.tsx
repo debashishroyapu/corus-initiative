@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./global.css";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import { AuthProvider } from "../app/contexts/AuthContext";
+import { AuthProvider } from "./contexts/AuthContext"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Corus-Initiative ",
+  title: "Corus-Initiative",
   description: "Transform your business with data-driven engineering, innovative design, and cutting-edge software solutions",
   keywords: "software development, web development, data analytics, digital marketing, UI/UX design",
   authors: [{ name: "Corus Initiative" }],
@@ -26,19 +24,6 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
-// Client component for route detection
-function LayoutContent({ children }: { children: React.ReactNode }) {
-  return (
-    <AuthProvider>
-      <Navbar />
-      <main className="min-h-screen">
-        {children}
-      </main>
-      <Footer />
-    </AuthProvider>
-  );
-}
 
 export default function RootLayout({
   children,
@@ -50,7 +35,12 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900`}
       >
-        <LayoutContent>{children}</LayoutContent>
+      
+        <AuthProvider>
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </AuthProvider>
       </body>
     </html>
   );

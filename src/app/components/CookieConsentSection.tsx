@@ -1,4 +1,3 @@
-// components/CookieConsentSection.tsx
 'use client';
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -16,10 +15,10 @@ export default function CookieConsent() {
 
   async function sendConsent(decision: boolean) {
     try {
+      // Send data matching your backend model
       await recordConsent({
         consent: decision,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
+        // ipAddress will be captured by the backend from req.ip
       });
     } catch (err) {
       console.error('Failed to send consent log', err);

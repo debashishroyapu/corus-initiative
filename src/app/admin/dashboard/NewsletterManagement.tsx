@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { getSubscribers, deleteSubscriber, getSubscriberStats } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Interfaces
 export interface NewsletterSubscriber {
   _id?: string;
   email: string;
@@ -14,23 +13,21 @@ export interface NewsletterSubscriber {
   updatedAt?: string;
 }
 
-
-interface ApiResponse<T = any> {
-  success: boolean;
-  message: string;
-  data?: T;
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
+// This matches what getSubscriberStats returns from your API
+interface SubscriberStats {
+  total: number;
+  active: number;
+  inactive: number;
+  recent: number;
 }
 
-interface SubscriberStats {
-  totalSubscribers: number;
-  activeSubscribers: number;
-  todaySubscribers: number;
+// This matches what getSubscribers returns from your API
+interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 interface PaginationInfo {
@@ -41,12 +38,12 @@ interface PaginationInfo {
 }
 
 export default function NewsletterManagement() {
-  const { admin } = useAuth(); // Remove token from here
+  const { user } = useAuth(); 
   const [subscribers, setSubscribers] = useState<NewsletterSubscriber[]>([]);
   const [loading, setLoading] = useState(true);
   const [mutating, setMutating] = useState(false);
   const [search, setSearch] = useState('');
-  const [stats, setStats] = useState<SubscriberStats>({
+  const [stats, setStats] = useState({
     totalSubscribers: 0,
     activeSubscribers: 0,
     todaySubscribers: 0
@@ -61,18 +58,30 @@ export default function NewsletterManagement() {
   const loadSubscribers = async (page = 1, searchQuery = '') => {
     try {
       setLoading(true);
-      // Remove token parameter - API interceptor will handle authentication
-      const res: ApiResponse<NewsletterSubscriber[]> = await getSubscribers(page, pagination.limit, searchQuery);
-
-      if (res.success) {
-        setSubscribers(res.data || []);
-        if (res.pagination) {
-          setPagination(prev => ({
-            ...prev,
-            ...res.pagination,
-            page
-          }));
-        }
+      
+      // Prepare filters object for the API
+      const filters: any = {
+        page,
+        limit: pagination.limit
+      };
+      
+      // Add search if provided (if your API supports it)
+      if (searchQuery) {
+        filters.search = searchQuery;
+      }
+      
+      // getSubscribers expects 0-1 arguments (a filters object)
+      const response = await getSubscribers(filters);
+      
+      // Handle the paginated response
+      if (response && response.data) {
+        setSubscribers(response.data);
+        setPagination({
+          page: response.page,
+          limit: response.limit,
+          total: response.total,
+          pages: response.totalPages
+        });
       }
     } catch (error) {
       console.error('Failed to load subscribers:', error);
@@ -83,22 +92,26 @@ export default function NewsletterManagement() {
 
   const loadStats = async () => {
     try {
-      // Remove token parameter
-      const res: ApiResponse<SubscriberStats> = await getSubscriberStats();
-      if (res.success && res.data) {
-        setStats(res.data);
-      }
+      // getSubscriberStats returns the stats directly, not wrapped in ApiResponse
+      const response = await getSubscriberStats();
+      
+      // Map the API response to your component's state format
+      setStats({
+        totalSubscribers: response.total,
+        activeSubscribers: response.active,
+        todaySubscribers: response.recent
+      });
     } catch (error) {
       console.error('Failed to load stats:', error);
     }
   };
 
   useEffect(() => {
-    if (admin) {
+    if (user) {
       loadSubscribers();
       loadStats();
     }
-  }, [admin]); // Remove token from dependency
+  }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,9 +123,10 @@ export default function NewsletterManagement() {
 
     setMutating(true);
     try {
-      // Remove token parameter
-      const res = await deleteSubscriber(id);
-      if (res.success) {
+      // deleteSubscriber returns a response with success property
+      const response = await deleteSubscriber(id);
+      
+      if (response && response.success) {
         await loadSubscribers(pagination.page, search);
         await loadStats();
       }
@@ -123,7 +137,8 @@ export default function NewsletterManagement() {
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -133,7 +148,7 @@ export default function NewsletterManagement() {
     });
   };
 
-  if (!admin) {
+  if (!user) {
     return (
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="text-red-600 text-center py-8">
@@ -294,7 +309,7 @@ export default function NewsletterManagement() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          onClick={() => handleDelete(subscriber._id)}
+                          onClick={() => subscriber._id && handleDelete(subscriber._id)}
                           disabled={mutating}
                           className="text-red-600 hover:text-red-800 disabled:text-red-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded"
                         >

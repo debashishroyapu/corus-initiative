@@ -21,10 +21,15 @@ interface Schedule {
   updatedAt: string;
 }
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
+// ✅ Backend getSchedules returns { schedules: [], pagination: {} }
+interface ScheduleListResponse {
+  schedules: Schedule[];
+  pagination: { page: number; limit: number; total: number; pages: number };
+}
+
+// ✅ Backend updateScheduleStatus returns { schedule: {} }
+interface ScheduleSingleResponse {
+  schedule: Schedule;
 }
 
 export default function ScheduleTable() {
@@ -38,15 +43,14 @@ export default function ScheduleTable() {
 
     (async () => {
       try {
-        const res = await safeGet<ApiResponse<Schedule[]>>('/api/admin/schedules');
-        if (res.success) {
-          setSchedules(res.data || []);
+        const data = await safeGet<ScheduleListResponse>('/admin/schedules');
+        if (data?.schedules) {
+          setSchedules(data.schedules);
           setError(null);
         } else {
           setError('Failed to load schedules');
         }
       } catch (err: any) {
-        console.error('Failed to load schedules:', err);
         setError(err.message || 'Failed to load schedules');
       } finally {
         setLoading(false);
@@ -56,20 +60,15 @@ export default function ScheduleTable() {
 
   const updateStatus = async (id: string, status: string, meetingLink?: string) => {
     if (!user) return;
-    
     try {
-      const res = await safePut<ApiResponse<Schedule>>(`/api/admin/schedules/${id}`, { 
-        status, 
-        meetingLink 
-      });
-      if (res.success) {
-        setSchedules(s => s.map(sched => sched._id === res.data._id ? res.data : sched));
+      const data = await safePut<ScheduleSingleResponse>(`/admin/schedules/${id}`, { status, meetingLink });
+      if (data?.schedule) {
+        setSchedules(s => s.map(sched => sched._id === data.schedule._id ? data.schedule : sched));
         setError(null);
       } else {
         setError('Failed to update schedule');
       }
     } catch (err: any) {
-      console.error('Failed to update schedule:', err);
       setError(err.message || 'Failed to update schedule');
     }
   };
@@ -77,17 +76,15 @@ export default function ScheduleTable() {
   const remove = async (id: string) => {
     if (!user) return;
     if (!confirm('Are you sure you want to delete this schedule?')) return;
-    
     try {
-      const res = await safeDelete<ApiResponse<{ message: string }>>(`/api/admin/schedules/${id}`);
-      if (res.success) {
+      const result = await safeDelete<{ message: string }>(`/admin/schedules/${id}`);
+      if (result !== null) {
         setSchedules(s => s.filter(sched => sched._id !== id));
         setError(null);
       } else {
         setError('Failed to delete schedule');
       }
     } catch (err: any) {
-      console.error('Failed to delete schedule:', err);
       setError(err.message || 'Failed to delete schedule');
     }
   };
@@ -126,41 +123,30 @@ export default function ScheduleTable() {
       <h3 className="text-lg font-semibold mb-4">Scheduled Meetings</h3>
 
       {error && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
+        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>
       )}
-      
-      {loading && (
-        <div className="text-gray-500 text-center py-8">Loading schedules...</div>
-      )}
-      
-      {!loading && schedules.length === 0 && (
-        <div className="text-gray-500 text-center py-8">No scheduled meetings</div>
-      )}
-      
+
+      {loading && <div className="text-gray-500 text-center py-8">Loading schedules...</div>}
+      {!loading && schedules.length === 0 && <div className="text-gray-500 text-center py-8">No scheduled meetings</div>}
+
       {schedules.length > 0 && (
         <div className="space-y-4">
           {schedules.map(schedule => (
             <div key={schedule._id} className="border border-gray-200 p-4 rounded-lg hover:shadow-sm transition-shadow">
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-start gap-3">
-                  <div className="text-2xl mt-1">
-                    {getMeetingTypeIcon(schedule.meetingType)}
-                  </div>
+                  <div className="text-2xl mt-1">{getMeetingTypeIcon(schedule.meetingType)}</div>
                   <div>
                     <h4 className="font-medium text-gray-900">{schedule.name}</h4>
                     <p className="text-sm text-gray-600">{schedule.email}</p>
-                    {schedule.company && (
-                      <p className="text-sm text-gray-500">{schedule.company}</p>
-                    )}
+                    {schedule.company && <p className="text-sm text-gray-500">{schedule.company}</p>}
                   </div>
                 </div>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(schedule.status)}`}>
                   {schedule.status}
                 </span>
               </div>
-              
+
               <div className="text-sm text-gray-600 mb-3 space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">Type:</span>
@@ -177,14 +163,12 @@ export default function ScheduleTable() {
               </div>
 
               {schedule.message && (
-                <div className="mb-3 p-2 bg-gray-50 rounded text-sm text-gray-600">
-                  {schedule.message}
-                </div>
+                <div className="mb-3 p-2 bg-gray-50 rounded text-sm text-gray-600">{schedule.message}</div>
               )}
 
               <div className="flex gap-2 pt-2 border-t border-gray-100">
-                <select 
-                  value={schedule.status} 
+                <select
+                  value={schedule.status}
                   onChange={(e) => updateStatus(schedule._id, e.target.value)}
                   className="flex-1 text-sm p-2 border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
                 >
@@ -193,8 +177,7 @@ export default function ScheduleTable() {
                   <option value="cancelled">Cancelled</option>
                   <option value="completed">Completed</option>
                 </select>
-                
-                <button 
+                <button
                   onClick={() => remove(schedule._id)}
                   className="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
                 >

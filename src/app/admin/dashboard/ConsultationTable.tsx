@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { safeGet, safePut, safeDelete } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Type definitions
 interface Consultation {
   _id: string;
   name: string;
@@ -14,15 +13,20 @@ interface Consultation {
   budget?: string;
   timeline?: string;
   message: string;
-  status: 'new' | 'contacted' | 'in-progress' | 'completed';
+  status: 'new' | 'contacted' | 'in-progress' | 'completed' | 'pending' | 'converted' | 'rejected';
   createdAt: string;
   updatedAt: string;
 }
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
+// ✅ Backend getConsultations returns { consultations: [], pagination: {} }
+interface ConsultationListResponse {
+  consultations: Consultation[];
+  pagination: { page: number; limit: number; total: number; pages: number };
+}
+
+// ✅ Backend getConsultationById / updateConsultationStatus returns { consultation: {} }
+interface ConsultationSingleResponse {
+  consultation: Consultation;
 }
 
 export default function ConsultationTable() {
@@ -36,15 +40,14 @@ export default function ConsultationTable() {
 
     (async () => {
       try {
-        const res = await safeGet<ApiResponse<Consultation[]>>('/api/admin/consultations');
-        if (res.success) {
-          setItems(res.data || []);
+        const data = await safeGet<ConsultationListResponse>('/admin/consultations');
+        if (data?.consultations) {
+          setItems(data.consultations);
           setError(null);
         } else {
           setError('Failed to load consultations');
         }
       } catch (err: any) {
-        console.error('Failed to load consultations:', err);
         setError(err.message || 'Failed to load consultations');
       } finally {
         setLoading(false);
@@ -54,17 +57,15 @@ export default function ConsultationTable() {
 
   const updateStatus = async (id: string, status: string) => {
     if (!user) return;
-    
     try {
-      const res = await safePut<ApiResponse<Consultation>>(`/api/admin/consultations/${id}`, { status });
-      if (res.success) {
-        setItems(s => s.map(it => it._id === res.data._id ? res.data : it));
+      const data = await safePut<ConsultationSingleResponse>(`/admin/consultations/${id}`, { status });
+      if (data?.consultation) {
+        setItems(s => s.map(it => it._id === data.consultation._id ? data.consultation : it));
         setError(null);
       } else {
         setError('Failed to update consultation status');
       }
     } catch (err: any) {
-      console.error('Failed to update consultation:', err);
       setError(err.message || 'Failed to update consultation');
     }
   };
@@ -72,17 +73,15 @@ export default function ConsultationTable() {
   const remove = async (id: string) => {
     if (!user) return;
     if (!confirm('Are you sure you want to delete this consultation?')) return;
-    
     try {
-      const res = await safeDelete<ApiResponse<{ message: string }>>(`/api/admin/consultations/${id}`);
-      if (res.success) {
+      const result = await safeDelete<{ message: string }>(`/admin/consultations/${id}`);
+      if (result !== null) {
         setItems(s => s.filter(it => it._id !== id));
         setError(null);
       } else {
         setError('Failed to delete consultation');
       }
     } catch (err: any) {
-      console.error('Failed to delete consultation:', err);
       setError(err.message || 'Failed to delete consultation');
     }
   };
@@ -101,19 +100,12 @@ export default function ConsultationTable() {
       <h3 className="text-lg font-semibold mb-4">Consultations</h3>
 
       {error && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
+        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>
       )}
 
-      {loading && (
-        <div className="text-gray-500 text-center py-8">Loading consultations...</div>
-      )}
-      
-      {!loading && items.length === 0 && (
-        <div className="text-gray-500 text-center py-8">No consultations found</div>
-      )}
-      
+      {loading && <div className="text-gray-500 text-center py-8">Loading consultations...</div>}
+      {!loading && items.length === 0 && <div className="text-gray-500 text-center py-8">No consultations found</div>}
+
       {items.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -134,22 +126,24 @@ export default function ConsultationTable() {
                     <div className="text-xs text-gray-500">{consultation.email}</div>
                   </td>
                   <td className="py-3">
-                    <div className="font-medium text-gray-700">
-                      {consultation.projectType || 'General Inquiry'}
-                    </div>
+                    <div className="font-medium text-gray-700">{consultation.projectType || 'General Inquiry'}</div>
                     <div className="text-xs text-gray-500 truncate max-w-xs">
                       {consultation.message?.substring(0, 60)}...
                     </div>
                   </td>
                   <td className="py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      consultation.status === 'new' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : consultation.status === 'contacted' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : consultation.status === 'in-progress' 
-                        ? 'bg-purple-100 text-purple-800' 
-                        : 'bg-green-100 text-green-800'
+                      consultation.status === 'new' || consultation.status === 'pending'
+                        ? 'bg-blue-100 text-blue-800'
+                        : consultation.status === 'contacted'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : consultation.status === 'in-progress'
+                        ? 'bg-purple-100 text-purple-800'
+                        : consultation.status === 'converted'
+                        ? 'bg-green-100 text-green-800'
+                        : consultation.status === 'rejected'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-gray-100 text-gray-800'
                     }`}>
                       {consultation.status}
                     </span>
@@ -159,18 +153,18 @@ export default function ConsultationTable() {
                   </td>
                   <td className="py-3">
                     <div className="flex gap-2 items-center">
-                      <select 
-                        value={consultation.status} 
-                        onChange={(e) => updateStatus(consultation._id, e.target.value)} 
+                      <select
+                        value={consultation.status}
+                        onChange={(e) => updateStatus(consultation._id, e.target.value)}
                         className="text-sm p-2 border rounded focus:outline-none focus:ring-1 focus:ring-indigo-500"
                       >
-                        <option value="new">New</option>
+                        <option value="pending">Pending</option>
                         <option value="contacted">Contacted</option>
-                        <option value="in-progress">In Progress</option>
-                        <option value="completed">Completed</option>
+                        <option value="converted">Converted</option>
+                        <option value="rejected">Rejected</option>
                       </select>
-                      <button 
-                        onClick={() => remove(consultation._id)} 
+                      <button
+                        onClick={() => remove(consultation._id)}
                         className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
                       >
                         Delete

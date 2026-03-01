@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { safeGet, safePost, safePut, safeDelete } from '../../lib/api';
 import { useAuth } from '../../contexts/AuthContext';
 
-// Type definitions
 interface Project {
   _id: string;
   name: string;
@@ -23,19 +22,12 @@ interface Project {
   updatedAt: string;
 }
 
-interface ApiResponse<T> {
-  success: boolean;
-  data: T;
-  message?: string;
-}
-
 interface ProjectForm {
   name: string;
   client: string;
   status: string;
   budget: number;
   description?: string;
-  technologies?: string[];
 }
 
 export default function ProjectsTable() {
@@ -43,12 +35,7 @@ export default function ProjectsTable() {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Project | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<ProjectForm>({ 
-    name: '', 
-    client: '', 
-    status: 'planning', 
-    budget: 0 
-  });
+  const [form, setForm] = useState<ProjectForm>({ name: '', client: '', status: 'planning', budget: 0 });
   const { user } = useAuth();
 
   useEffect(() => {
@@ -56,15 +43,9 @@ export default function ProjectsTable() {
 
     (async () => {
       try {
-        const res = await safeGet<ApiResponse<Project[]>>('/api/admin/projects');
-        if (res.success) {
-          setProjects(res.data || []);
-          setError(null);
-        } else {
-          setError('Failed to load projects');
-        }
+        const res = await safeGet<{ projects: Project[]; pagination: any }>('/admin/projects');
+        setProjects(res?.projects || []);
       } catch (err: any) {
-        console.error('Load projects failed:', err);
         setError(err.message || 'Failed to load projects');
       } finally {
         setLoading(false);
@@ -72,49 +53,36 @@ export default function ProjectsTable() {
     })();
   }, [user]);
 
-  const startEdit = (project: Project) => { 
-    setEditing(project); 
-    setForm({ 
-      name: project.name, 
-      client: project.client, 
-      status: project.status, 
-      budget: project.budget 
-    }); 
+  const startEdit = (project: Project) => {
+    setEditing(project);
+    setForm({ name: project.name, client: project.client, status: project.status, budget: project.budget });
   };
 
   const create = async () => {
     if (!user) return;
-    
     try {
-      const res = await safePost<ApiResponse<Project>>('/api/admin/projects', form);
-      if (res.success) {
-        setProjects((s) => [res.data, ...s]);
+      const project = await safePost<Project>('/admin/projects', form);
+      if (project) {
+        setProjects(s => [project, ...s]);
         setForm({ name: '', client: '', status: 'planning', budget: 0 });
         setError(null);
-      } else {
-        setError('Failed to create project');
       }
-    } catch (err: any) { 
-      console.error('Create project failed:', err);
+    } catch (err: any) {
       setError(err.message || 'Failed to create project');
     }
   };
 
   const save = async () => {
     if (!user || !editing) return;
-    
     try {
-      const res = await safePut<ApiResponse<Project>>(`/api/admin/projects/${editing._id}`, form);
-      if (res.success) {
-        setProjects((s) => s.map(p => p._id === res.data._id ? res.data : p));
+      const updated = await safePut<Project>(`/admin/projects/${editing._id}`, form);
+      if (updated) {
+        setProjects(s => s.map(p => p._id === updated._id ? updated : p));
         setEditing(null);
         setForm({ name: '', client: '', status: 'planning', budget: 0 });
         setError(null);
-      } else {
-        setError('Failed to update project');
       }
-    } catch (err: any) { 
-      console.error('Update project failed:', err);
+    } catch (err: any) {
       setError(err.message || 'Failed to update project');
     }
   };
@@ -122,17 +90,11 @@ export default function ProjectsTable() {
   const remove = async (id: string) => {
     if (!user) return;
     if (!confirm('Are you sure you want to delete this project?')) return;
-    
     try {
-      const res = await safeDelete<ApiResponse<{ message: string }>>(`/api/admin/projects/${id}`);
-      if (res.success) {
-        setProjects((s) => s.filter(p => p._id !== id));
-        setError(null);
-      } else {
-        setError('Failed to delete project');
-      }
-    } catch (err: any) { 
-      console.error('Delete project failed:', err);
+      await safeDelete(`/admin/projects/${id}`);
+      setProjects(s => s.filter(p => p._id !== id));
+      setError(null);
+    } catch (err: any) {
       setError(err.message || 'Failed to delete project');
     }
   };
@@ -167,66 +129,44 @@ export default function ProjectsTable() {
       <h3 className="text-lg font-semibold mb-4">Projects</h3>
 
       {error && (
-        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-          {error}
-        </div>
+        <div className="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">{error}</div>
       )}
 
       <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
-        <input 
-          value={form.name} 
-          onChange={e => setForm({...form, name: e.target.value})} 
-          placeholder="Project Name" 
+        <input
+          value={form.name}
+          onChange={e => setForm({ ...form, name: e.target.value })}
+          placeholder="Project Name"
           className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        <input 
-          value={form.client} 
-          onChange={e => setForm({...form, client: e.target.value})} 
-          placeholder="Client" 
+        <input
+          value={form.client}
+          onChange={e => setForm({ ...form, client: e.target.value })}
+          placeholder="Client"
           className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        <input 
-          type="number" 
-          value={form.budget} 
-          onChange={e => setForm({...form, budget: Number(e.target.value)})} 
-          placeholder="Budget" 
+        <input
+          type="number"
+          value={form.budget}
+          onChange={e => setForm({ ...form, budget: Number(e.target.value) })}
+          placeholder="Budget"
           className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <div className="flex gap-2">
           {editing ? (
             <>
-              <button 
-                onClick={save} 
-                className="flex-1 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-              >
-                Save
-              </button>
-              <button 
-                onClick={cancelEdit} 
-                className="flex-1 px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
+              <button onClick={save} className="flex-1 px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors">Save</button>
+              <button onClick={cancelEdit} className="flex-1 px-3 py-2 border border-gray-300 rounded hover:bg-gray-50 transition-colors">Cancel</button>
             </>
           ) : (
-            <button 
-              onClick={create} 
-              className="flex-1 px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors"
-            >
-              Create
-            </button>
+            <button onClick={create} className="flex-1 px-3 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors">Create</button>
           )}
         </div>
       </div>
 
-      {loading && (
-        <div className="text-gray-500 text-center py-8">Loading projects...</div>
-      )}
-      
-      {!loading && projects.length === 0 && (
-        <div className="text-gray-500 text-center py-8">No projects found</div>
-      )}
-      
+      {loading && <div className="text-gray-500 text-center py-8">Loading projects...</div>}
+      {!loading && projects.length === 0 && <div className="text-gray-500 text-center py-8">No projects found</div>}
+
       {projects.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -250,32 +190,17 @@ export default function ProjectsTable() {
                       {project.status}
                     </span>
                   </td>
-                  <td className="py-3 font-semibold text-gray-900">
-                    ${project.budget.toLocaleString()}
-                  </td>
+                  <td className="py-3 font-semibold text-gray-900">${project.budget.toLocaleString()}</td>
                   <td className="py-3">
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-green-600 h-2 rounded-full" 
-                        style={{ width: `${project.progress}%` }}
-                      ></div>
+                      <div className="bg-green-600 h-2 rounded-full" style={{ width: `${project.progress}%` }}></div>
                     </div>
                     <span className="text-xs text-gray-500 mt-1">{project.progress}%</span>
                   </td>
                   <td className="py-3">
                     <div className="flex gap-2">
-                      <button 
-                        onClick={() => startEdit(project)} 
-                        className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => remove(project._id)} 
-                        className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors"
-                      >
-                        Delete
-                      </button>
+                      <button onClick={() => startEdit(project)} className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700 transition-colors">Edit</button>
+                      <button onClick={() => remove(project._id)} className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition-colors">Delete</button>
                     </div>
                   </td>
                 </tr>

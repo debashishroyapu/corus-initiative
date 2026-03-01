@@ -1,17 +1,33 @@
 "use client";
 
-import { motion, useInView } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, Globe, Layers, Rocket, Users } from "lucide-react";
+
+const features = [
+  { title: "Innovative Solutions", icon: Rocket, description: "Cutting-edge technology to solve complex business challenges with precision and creativity." },
+  { title: "Expert Team", icon: Users, description: "A dedicated team of developers, designers, and strategists committed to your success." },
+  { title: "Scalable Products", icon: Layers, description: "Build solutions that grow seamlessly with your business needs and ambitions." },
+  { title: "Global Impact", icon: Globe, description: "Delivering measurable results for clients across industries around the world." },
+];
 
 export default function AboutPage() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const heroRef = useRef(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
+  const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "25%"]);
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSending(true);
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
@@ -24,202 +40,332 @@ export default function AboutPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setSending(false);
     }
   };
 
   return (
-    <main className="relative min-h-screen text-white overflow-hidden bg-gray-900/60 backdrop-blur-lg">
+    <main className="relative min-h-screen text-white overflow-hidden bg-[#030712]">
 
-      {/* 🌈 Background Gradients */}
-      <div className="absolute -top-40 left-0 w-[700px] h-[700px] bg-blue-500/20 rounded-full blur-[140px]"></div>
-      <div className="absolute -bottom-32 right-0 w-[700px] h-[700px] bg-pink-500/20 rounded-full blur-[140px]"></div>
-      <motion.div
-        className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_#0ea5e9,_#0f172a,_#000000)] animate-gradient"
-        initial={{ backgroundPosition: "0% 50%" }}
-        animate={{ backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"] }}
-        transition={{ duration: 18, repeat: Infinity, ease: "linear" }}
-      />
-
-      {/* HERO SECTION */}
-      <section className="relative py-32 md:py-44 z-10 max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-16">
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="flex-1 text-center lg:text-left space-y-6"
-        >
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            Crafting Digital Experiences that Empower Businesses 🚀
-          </h1>
-          <p className="text-gray-300 max-w-xl mb-8">
-            We turn visionary ideas into scalable products that drive measurable business growth.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 mt-6">
-            <a
-              href="/consultation"
-              className="inline-block px-8 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-semibold text-white shadow-lg hover:shadow-cyan-400/50 transition-all"
-            >
-              Get Free Consultation
-            </a>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="flex-1 relative"
-        >
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-700">
-            <img
-              src="https://images.unsplash.com/photo-1556761175-4b46a572b786"
-              alt="Team collaboration"
-              className="w-full object-cover hover:scale-[1.03] transition-transform duration-500"
-            />
-            <div className="absolute bottom-6 left-6 bg-gray-900/70 backdrop-blur-xl px-5 py-3 rounded-2xl shadow-md font-medium border border-gray-700/30">
-              💼 Trusted by 150+ Global Clients
-            </div>
-          </div>
-        </motion.div>
-      </section>
-
-     {/* ================= Corus Initiative Section ================= */}
-<section className="relative z-10 py-28 max-w-7xl mx-auto px-6 text-center">
-  {/* Heading */}
-  <h2 className="text-5xl md:text-6xl font-extrabold mb-6 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-    Corus Initiative
-  </h2>
-  <p className="text-gray-300 max-w-3xl mx-auto mb-16 text-lg md:text-xl">
-    At Corus Initiative, we transform ideas into scalable digital solutions. 
-    Our expertise spans web development, UX design, software engineering, 
-    and strategy consulting — all focused on delivering measurable impact.
-  </p>
-
-  {/* Feature Cards */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-    {[
-      { title: "Innovative Solutions", icon: "💡", description: "Cutting-edge technology to solve complex business challenges." },
-      { title: "Expert Team", icon: "👨‍💻", description: "A dedicated team of developers, designers, and strategists." },
-      { title: "Scalable Products", icon: "🚀", description: "Build solutions that grow with your business needs." },
-      { title: "Global Impact", icon: "🌎", description: "Delivering results for clients around the world." },
-    ].map((card, idx) => (
-      <div
-        key={idx}
-        className="relative bg-gray-900/60 backdrop-blur-lg border border-white/10 rounded-3xl p-6 flex flex-col items-center text-center shadow-2xl hover:scale-105 transition-transform duration-500"
-      >
-        <div className="text-5xl mb-4">{card.icon}</div>
-        <h3 className="text-2xl font-bold mb-2">{card.title}</h3>
-        <p className="text-gray-300">{card.description}</p>
+      {/* ── Background ── */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-[700px] h-[700px] bg-cyan-500/6 rounded-full blur-[140px]" />
+        <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-blue-600/6 rounded-full blur-[120px]" />
+        <div className="absolute top-1/2 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px]" />
+        <div className="absolute inset-0 opacity-[0.025]"
+          style={{ backgroundImage: 'linear-gradient(rgba(6,182,212,1) 1px, transparent 1px), linear-gradient(90deg, rgba(6,182,212,1) 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
       </div>
-    ))}
-  </div>
 
-  {/* Schedule Call Button */}
-  <div className="mt-16">
-    <a
-      href="/schedule-call"
-      className="inline-block px-10 py-4 rounded-full font-semibold text-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-blue-500 hover:to-cyan-500 text-white shadow-xl transition-all transform hover:scale-105"
-    >
-      Schedule a Call
-    </a>
-  </div>
-</section>
-
-
-      {/* OUR MISSION & VISION */}
-      <section className="relative z-10 py-28 max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-14 items-center">
+      {/* ══════════════════════════════════════
+          HERO
+      ══════════════════════════════════════ */}
+      <section ref={heroRef} className="relative z-10 min-h-screen flex items-center">
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-          className="space-y-12 bg-gray-900/50 backdrop-blur-lg rounded-2xl p-8 shadow-2xl"
+          style={{ y: heroY, opacity: heroOpacity }}
+          className="w-full max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center gap-16 py-32"
         >
-          <div>
-            <h2 className="text-4xl font-bold text-cyan-400 mb-4">Our Mission</h2>
-            <p className="text-gray-300 leading-relaxed text-lg">
-              To empower businesses through design-driven, tech-powered digital products that accelerate innovation and growth.
-            </p>
+          {/* Left */}
+          <div className="flex-1 space-y-8">
+            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-sm font-medium mb-6">
+                🌐 Digital Agency · Est. 2020
+              </span>
+              <h1 className="text-5xl lg:text-7xl font-black leading-[1.05] tracking-tight">
+                Crafting Digital
+                <br />
+                <span className="bg-gradient-to-r from-cyan-400 via-sky-400 to-blue-500 bg-clip-text text-transparent">
+                  Experiences
+                </span>
+                <br />
+                that Empower
+              </h1>
+            </motion.div>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.9 }}
+              className="text-gray-400 text-lg leading-relaxed max-w-lg"
+            >
+              We turn visionary ideas into scalable products that drive measurable business growth — from branding to full-stack engineering.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1.1 }}
+              className="flex flex-wrap gap-4"
+            >
+              <Link href="/consultations">
+                <motion.span
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/25 cursor-pointer"
+                >
+                  Free Consultation <ArrowRight className="w-4 h-4" />
+                </motion.span>
+              </Link>
+              <Link href="/schedule-call">
+                <motion.span
+                  whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+                  className="inline-flex items-center gap-2 px-8 py-4 rounded-xl border border-gray-700 hover:border-cyan-500/50 font-semibold text-gray-300 hover:text-white transition-colors cursor-pointer"
+                >
+                  Schedule a Call
+                </motion.span>
+              </Link>
+            </motion.div>
+
+            {/* Stats */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 1.3 }}
+              className="grid grid-cols-3 gap-3 pt-2"
+            >
+              {[
+                { value: "50+", label: "Global Clients" },
+                { value: "3+", label: "Years Experience" },
+                { value: "98%", label: "Satisfaction Rate" },
+              ].map(({ value, label }) => (
+                <div key={label} className="text-center px-4 py-4 rounded-xl bg-gray-900/60 border border-gray-800 hover:border-cyan-500/30 transition-colors">
+                  <div className="text-2xl font-black text-white">{value}</div>
+                  <div className="text-[11px] text-gray-500 uppercase tracking-widest mt-1">{label}</div>
+                </div>
+              ))}
+            </motion.div>
           </div>
-          <div>
-            <h2 className="text-4xl font-bold text-cyan-400 mb-4">Our Vision</h2>
-            <p className="text-gray-300 leading-relaxed text-lg">
-              To redefine the future of human-centered technology — creating seamless digital ecosystems where brands and users thrive together.
-            </p>
-          </div>
+
+          {/* Right — Hero image (Unsplash) */}
+          <motion.div
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 1 }}
+            className="flex-1 flex justify-center lg:justify-end"
+          >
+            <div className="relative w-full max-w-[560px]">
+              <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-3xl blur-2xl scale-105" />
+              <div className="relative rounded-3xl overflow-hidden border border-gray-700/60 shadow-2xl aspect-[4/3]" style={{ position: 'relative' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800&q=80"
+                  alt="Team collaboration"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#030712]/50 to-transparent" />
+              </div>
+              <motion.div
+                animate={{ y: [0, -8, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute -bottom-5 -left-5 bg-gray-900 border border-gray-700 rounded-2xl px-5 py-3 shadow-xl"
+              >
+                <div className="text-xs text-gray-400 mb-0.5">Trusted by</div>
+                <div className="text-xl font-black text-cyan-400">150+ Clients</div>
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* ══════════════════════════════════════
+          CORUS INITIATIVE
+      ══════════════════════════════════════ */}
+      <section className="relative z-10 py-28 max-w-7xl mx-auto px-6 lg:px-12">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-20"
+        >
+          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-sm font-medium mb-6">
+            Who We Are
+          </span>
+          <h2 className="text-4xl lg:text-6xl font-black mb-6">
+            Corus
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"> Initiative</span>
+          </h2>
+          <p className="text-gray-400 max-w-3xl mx-auto text-lg leading-relaxed">
+            At Corus Initiative, we transform ideas into scalable digital solutions. Our expertise spans web development,
+            UX design, software engineering, and strategy consulting — all focused on delivering measurable impact.
+          </p>
         </motion.div>
 
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {features.map((card, idx) => {
+            const Icon = card.icon;
+            return (
+              <motion.div
+                key={idx}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: idx * 0.12 }}
+                whileHover={{ y: -6 }}
+                className="bg-gray-900/60 backdrop-blur-sm border border-gray-800 hover:border-cyan-500/30 rounded-2xl p-6 flex flex-col items-center text-center transition-colors"
+              >
+                <div className="p-4 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-600/20 border border-cyan-500/20 mb-4">
+                  <Icon className="w-6 h-6 text-cyan-400" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">{card.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{card.description}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+
         <motion.div
-  initial={{ opacity: 0, x: 40 }}
-  whileInView={{ opacity: 1, x: 0 }}
-  transition={{ duration: 0.7 }}
-  viewport={{ once: true }}
-  className="relative rounded-3xl overflow-hidden shadow-2xl border border-gray-700 h-[400px] md:h-[500px]"
->
-  {/* Simple img tag with proper attributes */}
-  <img 
-    src="/images/service.jpg"
-    alt="Innovation"
-    loading="lazy"
-    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-    // Inline fallback style
-    style={{
-      background: 'linear-gradient(135deg, #0f172a 0%, #1e40af 100%)'
-    }}
-  />
-</motion.div>
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          className="text-center"
+        >
+          <Link href="/schedule-call">
+            <motion.span
+              whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}
+              className="inline-flex items-center gap-2 px-10 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 font-bold text-white shadow-lg shadow-cyan-500/25 cursor-pointer"
+            >
+              Schedule a Call <ArrowRight className="w-4 h-4" />
+            </motion.span>
+          </Link>
+        </motion.div>
       </section>
 
-      {/* CONTACT FORM */}
-      <section className="relative z-10 px-6 py-20 max-w-4xl mx-auto">
-        <h3 className="text-3xl font-bold mb-8 text-cyan-400 text-center">📩 Let’s Talk About Your Project</h3>
-        <form
-          onSubmit={handleSubmit}
-          className="bg-gray-900/70 backdrop-blur-lg border border-gray-700 p-8 rounded-2xl shadow-xl space-y-5"
-        >
-          <div>
-            <label className="block text-gray-300 mb-2">Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Enter your name"
-              className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-cyan-400 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-300 mb-2">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-              className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-cyan-400 outline-none"
-            />
-          </div>
-          <div>
-            <label className="block text-gray-300 mb-2">Message</label>
-            <textarea
-              name="message"
-              value={form.message}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Tell us about your project..."
-              className="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:border-cyan-400 outline-none"
-            ></textarea>
-          </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-semibold shadow-lg"
+      {/* ══════════════════════════════════════
+          MISSION & VISION
+      ══════════════════════════════════════ */}
+      <section className="relative z-10 py-28 max-w-7xl mx-auto px-6 lg:px-12">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+
+          {/* Text */}
+          <motion.div
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="space-y-10"
           >
-            Send Message
-          </motion.button>
-        </form>
+            <div>
+              <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-cyan-400 text-sm font-medium mb-6">
+                Our Purpose
+              </span>
+              <h2 className="text-4xl lg:text-5xl font-black mb-4">
+                Mission &
+                <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"> Vision</span>
+              </h2>
+            </div>
+
+            <div className="space-y-8">
+              <div className="pl-6 border-l-2 border-cyan-500/50">
+                <h3 className="text-xl font-bold text-cyan-400 mb-3">Our Mission</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  To empower businesses through design-driven, tech-powered digital products that accelerate innovation and growth — making world-class digital solutions accessible to all.
+                </p>
+              </div>
+              <div className="pl-6 border-l-2 border-blue-500/50">
+                <h3 className="text-xl font-bold text-blue-400 mb-3">Our Vision</h3>
+                <p className="text-gray-400 leading-relaxed">
+                  To redefine the future of human-centered technology — creating seamless digital ecosystems where brands and users thrive together in a connected world.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Image — public/images/pricing/pricing.jpg */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="relative"
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/15 to-blue-600/15 rounded-3xl blur-2xl scale-105" />
+            <div className="relative rounded-3xl overflow-hidden border border-gray-700/60 shadow-2xl aspect-[4/3]" style={{ position: 'relative' }}>
+              <Image
+                src="/images/pricing/pricing.jpg"
+                alt="Our Vision"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#030712]/40 to-transparent" />
+            </div>
+          </motion.div>
+        </div>
       </section>
+
+      {/* ══════════════════════════════════════
+          CONTACT FORM
+      ══════════════════════════════════════ */}
+      <section className="relative z-10 px-6 lg:px-12 py-24 max-w-3xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-12"
+        >
+          <h3 className="text-3xl lg:text-4xl font-black mb-3">
+            Let's Talk About
+            <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent"> Your Project</span>
+          </h3>
+          <p className="text-gray-400">We'll get back to you within 24 hours.</p>
+        </motion.div>
+
+        {submitted ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-16 bg-gray-900/60 border border-gray-800 rounded-2xl"
+          >
+            <div className="text-5xl mb-4">✅</div>
+            <h4 className="text-xl font-bold text-white mb-2">Message Sent!</h4>
+            <p className="text-gray-400">We'll be in touch shortly.</p>
+          </motion.div>
+        ) : (
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            onSubmit={handleSubmit}
+            className="bg-gray-900/60 backdrop-blur-md border border-gray-800 rounded-2xl p-8 shadow-2xl space-y-5"
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <label className="block text-gray-400 text-sm mb-2 font-medium">Full Name</label>
+                <input
+                  type="text" name="name" value={form.name} onChange={handleChange}
+                  placeholder="Your name" required
+                  className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-gray-700 focus:border-cyan-500 focus:outline-none text-white placeholder-gray-600 transition-colors"
+                />
+              </div>
+              <div>
+                <label className="block text-gray-400 text-sm mb-2 font-medium">Email</label>
+                <input
+                  type="email" name="email" value={form.email} onChange={handleChange}
+                  placeholder="you@company.com" required
+                  className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-gray-700 focus:border-cyan-500 focus:outline-none text-white placeholder-gray-600 transition-colors"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-gray-400 text-sm mb-2 font-medium">Message</label>
+              <textarea
+                name="message" value={form.message} onChange={handleChange}
+                rows={5} placeholder="Tell us about your project..." required
+                className="w-full px-4 py-3 rounded-xl bg-gray-800/80 border border-gray-700 focus:border-cyan-500 focus:outline-none text-white placeholder-gray-600 transition-colors resize-none"
+              />
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+              type="submit" disabled={sending}
+              className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl font-bold shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {sending ? "Sending..." : <>Send Message <ArrowRight className="w-4 h-4" /></>}
+            </motion.button>
+          </motion.form>
+        )}
+      </section>
+
     </main>
   );
 }

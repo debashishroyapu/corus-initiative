@@ -2,17 +2,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { fetchCaseStudies, CaseStudy } from '../lib/api';
-import { caseStudyImage } from '../lib/case-study-images';
-import { 
-  Clock, 
-  ArrowRight, 
-  Search, 
-  Filter,
-  Building,
-  Users,
-  DollarSign
-} from 'lucide-react';
+import { getCaseStudies, CaseStudy } from '../lib/api';
+import { ArrowRight, Search, Filter, Building } from 'lucide-react';
 
 export default function CaseStudiesPage() {
   const [caseStudies, setCaseStudies] = useState<CaseStudy[]>([]);
@@ -20,7 +11,6 @@ export default function CaseStudiesPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [industryFilter, setIndustryFilter] = useState('all');
-  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     loadCaseStudies();
@@ -28,11 +18,11 @@ export default function CaseStudiesPage() {
 
   useEffect(() => {
     filterCaseStudies();
-  }, [caseStudies, searchTerm, industryFilter, statusFilter]);
+  }, [caseStudies, searchTerm, industryFilter]);
 
   const loadCaseStudies = async () => {
     try {
-      const data = await fetchCaseStudies();
+      const data = await getCaseStudies();
       setCaseStudies(data);
     } catch (error) {
       console.error('Failed to load case studies:', error);
@@ -54,10 +44,6 @@ export default function CaseStudiesPage() {
 
     if (industryFilter !== 'all') {
       filtered = filtered.filter(study => study.industry === industryFilter);
-    }
-
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(study => study.status === statusFilter);
     }
 
     setFilteredStudies(filtered);
@@ -94,7 +80,6 @@ export default function CaseStudiesPage() {
       <section className="py-12 bg-white/10 backdrop-blur-sm border-y border-white/10">
         <div className="container mx-auto px-4 max-w-6xl">
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
-            {/* Search */}
             <div className="relative flex-1 max-w-md w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
@@ -106,7 +91,6 @@ export default function CaseStudiesPage() {
               />
             </div>
 
-            {/* Filters */}
             <div className="flex flex-wrap gap-4">
               <select
                 value={industryFilter}
@@ -118,20 +102,9 @@ export default function CaseStudiesPage() {
                   <option key={industry} value={industry}>{industry}</option>
                 ))}
               </select>
-
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-4 py-3 bg-gray-800 text-gray-200 border border-gray-700 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
-              >
-                <option value="all">All Status</option>
-                <option value="published">Published</option>
-                <option value="draft">Draft</option>
-              </select>
             </div>
           </div>
 
-          {/* Results Count */}
           <div className="text-center mb-8 text-gray-400">
             Showing {filteredStudies.length} of {caseStudies.length} case studies
           </div>
@@ -154,10 +127,9 @@ export default function CaseStudiesPage() {
                   key={study._id}
                   className="group bg-gray-800/70 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-gray-700 hover:border-blue-500/50"
                 >
-                  {/* Image */}
                   <div className="relative h-48 overflow-hidden">
                     <Image
-                      src={caseStudyImage(study.slug)}
+                      src={study.image || '/images/case-studies/default.jpg'}
                       alt={study.title}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-500"
@@ -165,16 +137,15 @@ export default function CaseStudiesPage() {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                     <div className="absolute top-4 right-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                        study.status === 'published' 
-                          ? 'bg-green-400/20 text-green-300' 
+                        study.isPublished
+                          ? 'bg-green-400/20 text-green-300'
                           : 'bg-yellow-400/20 text-yellow-200'
                       }`}>
-                        {study.status}
+                        {study.isPublished ? 'Published' : 'Draft'}
                       </span>
                     </div>
                   </div>
 
-                  {/* Content */}
                   <div className="p-6">
                     {study.industry && (
                       <div className="text-xs bg-blue-500/10 text-blue-300 px-3 py-1 rounded-full inline-block mb-3">
@@ -187,29 +158,8 @@ export default function CaseStudiesPage() {
                     </h2>
 
                     <p className="text-gray-400 mb-4 line-clamp-3">
-                      {study.description}
+                      {study.challenge}
                     </p>
-
-                    <div className="grid grid-cols-3 gap-4 mb-4 text-center">
-                      {study.projectDuration && (
-                        <div>
-                          <Clock className="h-4 w-4 text-blue-400 mx-auto mb-1" />
-                          <p className="text-xs text-gray-400">{study.projectDuration}</p>
-                        </div>
-                      )}
-                      {study.teamSize && (
-                        <div>
-                          <Users className="h-4 w-4 text-green-400 mx-auto mb-1" />
-                          <p className="text-xs text-gray-400">{study.teamSize} people</p>
-                        </div>
-                      )}
-                      {study.budget && (
-                        <div>
-                          <DollarSign className="h-4 w-4 text-purple-400 mx-auto mb-1" />
-                          <p className="text-xs text-gray-400">${study.budget.toLocaleString()}</p>
-                        </div>
-                      )}
-                    </div>
 
                     {study.client && (
                       <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
@@ -221,17 +171,12 @@ export default function CaseStudiesPage() {
                     {study.technologies && study.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-4">
                         {study.technologies.slice(0, 3).map((tech, index) => (
-                          <span
-                            key={index}
-                            className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs"
-                          >
+                          <span key={index} className="bg-gray-700 text-gray-300 px-2 py-1 rounded text-xs">
                             {tech}
                           </span>
                         ))}
                         {study.technologies.length > 3 && (
-                          <span className="text-gray-500 text-xs">
-                            +{study.technologies.length - 3} more
-                          </span>
+                          <span className="text-gray-500 text-xs">+{study.technologies.length - 3} more</span>
                         )}
                       </div>
                     )}
@@ -254,23 +199,15 @@ export default function CaseStudiesPage() {
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-r from-blue-600 to-green-600 text-white text-center">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Start Your Project?
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Start Your Project?</h2>
           <p className="text-lg text-blue-100 mb-8 max-w-2xl mx-auto">
-            Let’s discuss how we can help you achieve similar success with your business.
+            Let's discuss how we can help you achieve similar success with your business.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/consultation"
-              className="bg-white text-blue-700 px-8 py-4 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1"
-            >
+            <Link href="/consultation" className="bg-white text-blue-700 px-8 py-4 rounded-2xl font-semibold hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1">
               Get Free Consultation
             </Link>
-            <Link
-              href="/contact"
-              className="border-2 border-white text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white hover:text-blue-700 transition-all duration-300 transform hover:-translate-y-1"
-            >
+            <Link href="/contact" className="border-2 border-white text-white px-8 py-4 rounded-2xl font-semibold hover:bg-white hover:text-blue-700 transition-all duration-300 transform hover:-translate-y-1">
               Contact Us
             </Link>
           </div>

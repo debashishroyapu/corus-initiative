@@ -2,65 +2,52 @@
 
 import { useAuth } from "../contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import AdminSidebar from "./dashboard/Sidebar";
 import AdminTopbar from "./dashboard/Topbar";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { admin, loading, logout } = useAuth();
+  const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [isChecking, setIsChecking] = useState(true);
 
   const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
-    console.log('🔄 Admin Layout Check:', { 
-      loading, 
-      admin: admin?.email, 
-      isLoginPage,
-      pathname 
-    });
-
-    // Wait for auth to load
     if (loading) return;
 
-    // If on login page and admin exists, redirect to dashboard
-    if (admin && isLoginPage) {
-      console.log('✅ Admin found on login page, redirecting to dashboard');
-      router.push('/admin');
-      return;
+    // Logged-in user login page-e asle dashboard-e pathao
+    if (user && isLoginPage) {
+      router.replace('/admin');
     }
 
-    // If not on login page and no admin, redirect to login
-    if (!admin && !isLoginPage) {
-      console.log('🚫 No admin, redirecting to login');
-      router.push('/admin/login');
-      return;
+    // Logged-out user protected page-e asle login-e pathao
+    if (!user && !isLoginPage) {
+      router.replace('/admin/login');
     }
+  }, [user, loading, isLoginPage, router]);
 
-    // All checks passed
-    setIsChecking(false);
-  }, [admin, loading, router, isLoginPage, pathname]);
-
-  // Show loading during initial check
-  if (loading || isChecking) {
+  // Auth check চলাকালীন শুধু spinner দেখাও
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto" />
           <p className="mt-4 text-gray-600">Loading admin panel...</p>
         </div>
       </div>
     );
   }
 
-  // Show login page without sidebar
+  // Login page — sidebar ছাড়া render করো
   if (isLoginPage) {
     return <div className="min-h-screen bg-gray-50">{children}</div>;
   }
 
-  // Show admin dashboard with sidebar
+  // Protected page কিন্তু user নেই — redirect pending, কিছু দেখাবো না
+  if (!user)return null;
+
+  // Admin dashboard with sidebar
   return (
     <div className="flex min-h-screen bg-gray-50">
       <AdminSidebar />

@@ -1,8 +1,8 @@
-import { fetchSolutions, Solution } from "../lib/api";
+import { getSolutions, Solution } from "../lib/api";
 import Link from "next/link";
 
 export default async function SolutionsPage() {
-  const solutions: Solution[] = await fetchSolutions();
+  const solutions: Solution[] = await getSolutions();
 
   return (
     /* FULL WIDTH DARK BACKGROUND */

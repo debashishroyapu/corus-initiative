@@ -11,36 +11,56 @@ import ConsultationTable from '../admin/dashboard/ConsultationTable';
 import RecentActivities from '../admin/dashboard/RecentActivities';
 import ScheduleTable from "../admin/dashboard/ScheduleTable";
 import Consent from "../admin/dashboard/Consent";
-import { fetchDashboardSummary } from '../lib/api';
+import { safeGet } from '../lib/api';
 
-type DashboardSummary = {
-  totalRevenue: number;
-  totalClients: number;
-  activeProjects: number;
-  pendingConsultations: number;
-  upcomingMeetings: number;
-  recentActivities: any[];
-};
+// ✅ /api/stats/dashboard এর actual response structure
+interface DashboardData {
+  counts: {
+    blogs: number;
+    caseStudies: number;
+    solutions: number;
+    industries: number;
+    projects: number;
+    clients: number;
+    teamMembers: number;
+    schedules: number;
+    consultations: number;
+    subscribers: number;
+  };
+  performance: {
+    activeProjects: number;
+    completedProjects: number;
+    activeClients: number;
+    pendingSchedules: number;
+    pendingConsultations: number;
+    projectCompletionRate: number;
+  };
+  recentActivities: {
+    blogs: any[];
+    caseStudies: any[];
+    projects: any[];
+    consultations: any[];
+  };
+}
 
 export default function AdminPage() {
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [summary, setSummary] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadDashboardData = async () => {
+    (async () => {
       try {
-        const response = await fetchDashboardSummary();
-        if (response.success && response.data) {
-          setSummary(response.data);
+        // ✅ /stats/dashboard → API_BASE_URL already includes /api
+        const data = await safeGet<DashboardData>('/stats/dashboard');
+        if (data) {
+          setSummary(data);
         }
       } catch (err) {
         console.error('Failed to load dashboard summary', err);
       } finally {
         setLoading(false);
       }
-    };
-    
-    loadDashboardData();
+    })();
   }, []);
 
   if (loading) {
@@ -60,12 +80,13 @@ export default function AdminPage() {
 
   return (
     <div className="space-y-6">
+      {/* ✅ summary?.counts ও summary?.performance থেকে data নাও */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-        <StatCard title="Revenue" value={`$${summary?.totalRevenue?.toLocaleString() ?? 0}`} />
-        <StatCard title="Clients" value={summary?.totalClients ?? 0} />
-        <StatCard title="Projects" value={summary?.activeProjects ?? 0} />
-        <StatCard title="Consultations" value={summary?.pendingConsultations ?? 0} />
-        <StatCard title="Meetings" value={summary?.upcomingMeetings ?? 0} />
+        <StatCard title="Clients" value={summary?.counts?.clients ?? 0} />
+        <StatCard title="Projects" value={summary?.counts?.projects ?? 0} />
+        <StatCard title="Active Projects" value={summary?.performance?.activeProjects ?? 0} />
+        <StatCard title="Pending Consultations" value={summary?.performance?.pendingConsultations ?? 0} />
+        <StatCard title="Pending Meetings" value={summary?.performance?.pendingSchedules ?? 0} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -77,7 +98,7 @@ export default function AdminPage() {
         <div className="space-y-6">
           <FinancialAnalytics />
           <TeamTable />
-          <RecentActivities />
+          <RecentActivities activities={summary?.recentActivities} />
         </div>
       </div>
 

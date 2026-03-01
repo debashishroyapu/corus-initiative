@@ -16,7 +16,7 @@ const links = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { logout, admin } = useAuth();
+  const { logout, user } = useAuth();
 
   return (
     <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -37,7 +37,7 @@ export default function Sidebar() {
 
       <div className="p-4 border-t">
         <div className="text-xs text-gray-500">Signed in as</div>
-        <div className="text-sm font-medium text-gray-900 truncate">{admin?.email}</div>
+        <div className="text-sm font-medium text-gray-900 truncate">{user?.email}</div>
         <button
           onClick={() => logout()}
           className="mt-4 w-full text-left text-red-600 flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-50"

@@ -5,10 +5,9 @@ import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
-  fetchIndustryBySlug,
+  getIndustryBySlug,
   Industry as BaseIndustry,
 } from "../../lib/api";
-import { getIndustryImage } from "../../lib/industry-image";
 import { FiTarget, FiUsers, FiMonitor, FiPackage } from "react-icons/fi";
 import { ArrowRight } from "lucide-react";
 
@@ -18,36 +17,17 @@ interface Benefit {
   icon: React.ComponentType<{ size?: number }>;
 }
 
-interface Challenge {
-  title: string;
-  description: string;
-}
-
-interface Industry extends Omit<BaseIndustry, "solutions"> {
+interface Industry extends BaseIndustry {
   heroImage?: string;
   benefits?: Benefit[];
-  challenges?: Challenge[];
-  solutions?: {
-    title: string;
-    description: string;
-    slug: string;
-  }[];
-  overview?: string;
 }
 
-// Default Benefits
 const defaultBenefits: Benefit[] = [
   { title: "Scalable Solutions", description: "Easily adapt to business growth with modular design.", icon: FiTarget },
   { title: "Expert Team", description: "Work with dedicated industry professionals.", icon: FiUsers },
   { title: "Data-Driven", description: "Use real-time analytics to make smarter decisions.", icon: FiMonitor },
   { title: "End-to-End Support", description: "From strategy to deployment, we cover it all.", icon: FiPackage },
 ];
-
-// Default Challenge
-const defaultChallenge: Challenge = {
-  title: "Sustainable Growth",
-  description: "Driving long-term success with scalable technology, continuous improvement, and measurable performance.",
-};
 
 const IndustryPage: React.FC = () => {
   const params = useParams();
@@ -60,25 +40,12 @@ const IndustryPage: React.FC = () => {
 
     const loadIndustry = async () => {
       try {
-        const data = await fetchIndustryBySlug(slug);
-
-        const backendChallenges = data.challenges?.slice(0, 3) ?? [];
-        const combinedChallenges = [...backendChallenges, defaultChallenge];
-
-        const solutions = data.solutions?.map((sol: any) => ({
-          title: sol.title,
-          description: sol.description ?? "",
-          slug: sol.slug ?? sol.title.toLowerCase().replace(/\s+/g, "-").replace(/[^\w-]+/g, ""),
-        })) ?? [];
-
-        const heroImage = getIndustryImage(slug);
+        const data = await getIndustryBySlug(slug);
 
         setIndustry({
           ...data,
-          heroImage,
-          solutions,
+          heroImage: `/images/industries/${slug}.jpg`,
           benefits: defaultBenefits,
-          challenges: combinedChallenges,
         });
       } catch (error) {
         console.error("❌ Failed to fetch industry:", error);
@@ -114,6 +81,9 @@ const IndustryPage: React.FC = () => {
           fill
           className="object-cover"
           priority
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/images/industries/default.jpg";
+          }}
         />
         <div className="absolute inset-0 bg-black/70" />
         <div className="relative z-10 text-center max-w-3xl px-6">
@@ -126,7 +96,6 @@ const IndustryPage: React.FC = () => {
             {industry.title}
           </motion.h1>
 
-          {/* ✅ Overview from backend */}
           {industry.overview && (
             <motion.p
               className="text-gray-300 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed"
@@ -219,7 +188,7 @@ const IndustryPage: React.FC = () => {
             href="/schedule-call"
             className="inline-block px-8 py-3 rounded-full text-lg font-semibold bg-gradient-to-r from-blue-500 via-cyan-400 to-indigo-500 hover:opacity-90 transition-all text-white shadow-md"
           >
-            Let’s Get Started →
+            Let's Get Started →
           </motion.a>
         </div>
       </div>

@@ -22,12 +22,25 @@ export default function StatsCards() {
     try {
       setLoading(true);
       setError(null);
+      
       const result = await getStats();
       
-      if (result.success && result.data) {
-        setStats(result.data);
+      if (result) {
+        // Transform the API Stats to your StatsData format
+        const transformedStats: StatsData = {
+          happyClients: result.happyClients,
+          projectsDone: result.projectsCompleted,
+          clientSatisfaction: Math.min(100, Math.round((result.happyClients / (result.projectsCompleted || 1)) * 100)) || 95,
+          totalRevenue: 0,
+          lastUpdated: result.updatedAt,
+          _id: result._id,
+          createdAt: result.updatedAt,
+          updatedAt: result.updatedAt
+        };
+        
+        setStats(transformedStats);
       } else {
-        setError(result.message || 'Failed to load statistics');
+        setError('Failed to load statistics');
       }
     } catch (error: any) {
       console.error('Failed to fetch stats:', error);
@@ -41,6 +54,7 @@ export default function StatsCards() {
     fetchStats();
   }, []);
 
+  // Loading state
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -56,6 +70,7 @@ export default function StatsCards() {
     );
   }
 
+  // Error state
   if (error) {
     return (
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
@@ -70,6 +85,7 @@ export default function StatsCards() {
     );
   }
 
+  // No data state
   if (!stats) {
     return (
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 text-center">
@@ -78,6 +94,7 @@ export default function StatsCards() {
     );
   }
 
+  // Main render with data
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Happy Clients Card */}

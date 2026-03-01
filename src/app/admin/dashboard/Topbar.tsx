@@ -3,7 +3,7 @@ import { Bell, Search } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function Topbar() {
-  const { admin } = useAuth();
+  const { user } = useAuth();
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-white shadow-sm">
       <div className="flex items-center gap-4">
@@ -15,7 +15,7 @@ export default function Topbar() {
       </div>
       <div className="flex items-center gap-4">
         <button className="p-2 rounded-full hover:bg-gray-100"><Bell className="w-5 h-5 text-gray-600" /></button>
-        <div className="text-sm text-gray-700">{admin?.name}</div>
+        <div className="text-sm text-gray-700">{user?.email}</div>
       </div>
     </header>
   );

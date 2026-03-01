@@ -1,484 +1,301 @@
-import { 
-  fallbackMenus, 
-  fallbackSolutions, 
-  fallbackIndustries, 
-  fallbackBlogs, 
-  fallbackCaseStudies,
-  fallbackProjects,
-  fallbackTeamMembers,
-  fallbackClients,
-  fallbackFinancialData,
-  fallbackConsultations,
-  fallbackSchedules,
-  Subscribers,
-  fallbackConsentData
-} from './data';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosError,
+  InternalAxiosRequestConfig,
+} from 'axios';
 
-// ========== COMMON INTERFACES ==========
+// =============================================================================
+// CORE RESPONSE TYPES
+// =============================================================================
 
-export interface ApiResponse<T = any> {
+/**
+ * Standard envelope returned by every backend endpoint.
+ * The `data` field is unwrapped automatically by ApiClient's HTTP methods.
+ */
+export interface ApiResponse<T = unknown> {
   success: boolean;
-  message: string;
   data?: T;
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
+  message?: string;
+  error?: string;
+  timestamp?: string;
 }
 
-// Simulate network delay
-const simulateDelay = (ms: number = 300) => 
-  new Promise(resolve => setTimeout(resolve, ms));
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
-// Generic success response
-const successResponse = <T>(data: T, message: string = 'Success'): ApiResponse<T> => ({
-  success: true,
-  message,
-  data
-});
+// =============================================================================
+// ENTITY TYPES
+// =============================================================================
 
-// Generic error response
-const errorResponse = (message: string = 'Error occurred'): ApiResponse => ({
-  success: false,
-  message
-});
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  contentHtml: string;
+  image: string;
+  author: string;
+  category: string;
+  tags: string[];
+  readTime: number;
+  publishedAt: string;
+  isPublished?: boolean;
+  views?: number;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
 
-// ========== MENU APIs ==========
+export interface BlogFilters {
+  page?: number;
+  limit?: number;
+  category?: string;
+  tag?: string;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
 
 export interface MenuItem {
   label: string;
   href: string;
   slug: string;
-  description?: string;
 }
 
-export interface MenuGroup {
-  _id?: string;
+export interface Menu {
+  _id: string;
   slug: string;
   title: string;
   items: MenuItem[];
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-export const fetchMenus = async (): Promise<MenuGroup[]> => {
-  await simulateDelay();
-  return fallbackMenus.map(menu => ({
-    ...menu,
-    _id: `menu-${menu.slug}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-};
-
-// ========== SOLUTIONS APIs ==========
-
-export interface SolutionStep {
+export interface WorkflowStep {
   title: string;
   description: string;
 }
 
+export interface ExpertiseItem {
+  title: string;
+  description: string;
+  points?: string[];
+}
+
+export interface Deliverable {
+  item: string;
+  description: string;
+}
+
 export interface Solution {
-  _id?: string;
+  _id: string;
   slug: string;
   title: string;
   subtitle?: string;
-  description?: string;
-  heroImage?: string;
-  workflow?: SolutionStep[];
-  expertise?: SolutionStep[];
-  deliverables?: { item: string; description: string }[];
-  createdAt?: string;
-  updatedAt?: string;
+  description: string;
+  workflow?: WorkflowStep[];
+  expertise?: ExpertiseItem[];
+  deliverables?: Deliverable[];
+  icon?: string;
+  image?: string;
+  isActive?: boolean;
+  order?: number;
+  seoTitle?: string;
+  seoDescription?: string;
 }
 
-export const fetchSolutions = async (): Promise<Solution[]> => {
-  await simulateDelay();
-  return fallbackSolutions.map(solution => ({
-    ...solution,
-    _id: `solution-${solution.slug}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-};
+export interface IndustryChallenge {
+  title: string;
+  description: string;
+}
 
-export const fetchSolutionBySlug = async (slug: string): Promise<Solution> => {
-  await simulateDelay();
-  const solution = fallbackSolutions.find(s => s.slug === slug);
-  if (!solution) {
-    throw new Error('Solution not found');
-  }
-  return {
-    ...solution,
-    _id: `solution-${solution.slug}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-};
-
-// ========== INDUSTRIES APIs ==========
+export interface IndustrySolution {
+  title: string;
+  description: string;
+}
 
 export interface Industry {
-  _id?: string;
+  _id: string;
   slug: string;
   title: string;
-  overview?: string;
-  challenges?: { title: string; description: string }[];
-  solutions?: { title: string; description: string }[];
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export const fetchIndustries = async (): Promise<Industry[]> => {
-  await simulateDelay();
-  return fallbackIndustries.map(industry => ({
-    ...industry,
-    _id: `industry-${industry.slug}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-};
-
-export const fetchIndustryBySlug = async (slug: string): Promise<Industry> => {
-  await simulateDelay();
-  const industry = fallbackIndustries.find(i => i.slug === slug);
-  if (!industry) {
-    throw new Error('Industry not found');
-  }
-  return {
-    ...industry,
-    _id: `industry-${industry.slug}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-};
-
-// ========== BLOG APIs ==========
-
-export interface Blog {
-  _id?: string;
-  title: string;
-  slug: string;
-  excerpt?: string;
-  content?: string;
-  author?: string;
-  createdAt?: string;
-  publishedAt?: string;
+  overview: string;
+  challenges: IndustryChallenge[];
+  solutions: IndustrySolution[];
+  icon?: string;
   image?: string;
-  contentHtml?: string;
-  category?: string;
-  status?: 'draft' | 'published';
-  tags?: string[];
-  readTime?: number;
+  isActive?: boolean;
+  order?: number;
 }
-
-export const fetchBlogs = async (): Promise<Blog[]> => {
-  await simulateDelay();
-  return fallbackBlogs.map((blog, index) => ({
-    ...blog,
-    _id: `blog-${blog.slug || index}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    publishedAt: blog.publishedAt || new Date().toISOString()
-  }));
-};
-
-export const fetchBlogBySlug = async (slug: string): Promise<Blog> => {
-  await simulateDelay();
-  const blog = fallbackBlogs.find(b => b.slug === slug);
-  if (!blog) {
-    throw new Error('Blog not found');
-  }
-  return {
-    ...blog,
-    _id: `blog-${blog.slug}`,
-    createdAt: new Date().toISOString(),
-    publishedAt: blog.publishedAt || new Date().toISOString()
-  };
-};
-
-// ========== CASE STUDIES APIs ==========
 
 export interface CaseStudy {
-  _id?: string;
-  title: string;
+  _id: string;
   slug: string;
-  description?: string;
-  results?: string;
-  image?: string;
-  industry?: string;
-  client?: string;
-  challenge?: string;
-  solution?: string;
-  technologies?: string[];
-  status?: 'draft' | 'published';
-  projectDuration?: string;
-  teamSize?: number;
-  budget?: number;
-  testimonial?: {
-    quote: string;
-    author: string;
-    position: string;
-  };
-  gallery?: string[];
-  createdAt?: string;
-  updatedAt?: string;
+  title: string;
+  industry: string;
+  client: string;
+  challenge: string;
+  solution: string;
+  results: string;
+  technologies: string[];
+  image: string;
+  isPublished: boolean;
+  views: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-export const fetchCaseStudies = async (): Promise<CaseStudy[]> => {
-  await simulateDelay();
-  return fallbackCaseStudies.map((caseStudy, index) => ({
-    ...caseStudy,
-    _id: `case-study-${caseStudy.slug || index}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-};
+export interface Stats {
+  _id: string;
+  yearsOfExperience: number;
+  projectsCompleted: number;
+  happyClients: number;
+  teamMembers: number;
+  countriesServed: number;
+  awards: number;
+  updatedAt: string;
+}
 
-export const fetchCaseStudyBySlug = async (slug: string): Promise<CaseStudy> => {
-  await simulateDelay();
-  const caseStudy = fallbackCaseStudies.find(c => c.slug === slug);
-  if (!caseStudy) {
-    throw new Error('Case study not found');
-  }
-  return {
-    ...caseStudy,
-    _id: `case-study-${caseStudy.slug}`,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-};
+// =============================================================================
+// FORM TYPES
+// =============================================================================
 
-// ========== CONSULTATION APIs ==========
+export interface NewsletterData {
+  email: string;
+  name?: string;
+}
 
-export interface Consultation {
-  _id?: string;
+export interface NewsletterSubscriber extends NewsletterData {
+  _id: string;
+  isActive: boolean;
+  subscribedAt: string;
+  preferences?: string[];
+}
+
+export type ConsultationStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+
+export interface ConsultationData {
   name: string;
   email: string;
   phone?: string;
-  company?: string;
-  projectType?: string;
-  budget?: string;
-  timeline?: string;
   message: string;
-  status: 'new' | 'contacted' | 'in-progress' | 'completed';
-  createdAt?: string;
-  updatedAt?: string;
+  company?: string;
+  service?: string;
+  preferredDate?: string;
+  preferredTime?: string;
+  status?: ConsultationStatus;
 }
 
-export interface CreateConsultationData {
+export type MeetingType = 'consultation' | 'demo' | 'technical' | 'sales' | 'other';
+export type ScheduleStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+
+export interface ScheduleData {
   name: string;
   email: string;
   phone?: string;
   company?: string;
-  projectType?: string;
-  budget?: string;
-  timeline?: string;
-  message: string;
-}
-
-export const createConsultation = async (data: CreateConsultationData): Promise<ApiResponse<Consultation>> => {
-  await simulateDelay();
-  const newConsultation: Consultation = {
-    ...data,
-    _id: `consult-${Date.now()}`,
-    status: 'new',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  
-  // Store in fallbackConsultations (simulated)
-  fallbackConsultations.push({
-    name: data.name,
-    email: data.email,
-    phone: data.phone || '',
-    message: data.message
-  });
-  
-  return successResponse(newConsultation, 'Consultation submitted successfully');
-};
-
-// ========== SCHEDULE APIs ==========
-
-export interface Schedule {
-  _id?: string;
-  name: string;
-  email: string;
-  phone?: string;
-  company?: string;
-  meetingType: 'consultation' | 'demo' | 'technical' | 'sales' | 'other';
+  meetingType: MeetingType;
   preferredDate: string;
   preferredTime: string;
-  timezone: string;
+  timezone?: string;
   message?: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+}
+
+export interface Schedule extends ScheduleData {
+  _id: string;
+  status: ScheduleStatus;
   meetingLink?: string;
   adminNotes?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-export interface CreateScheduleData {
+export interface RecordConsentInput {
+  consent: boolean;
+  type?: string;
+  email?: string;
+  timestamp?: string;
+  userAgent?: string;
+}
+
+export interface ConsentData {
+  consent: boolean;
+  type: string;
+  email?: string;
+  timestamp: string;
+  userAgent: string;
+}
+
+// =============================================================================
+// AUTH TYPES
+// =============================================================================
+
+export interface LoginCredentials {
+  email: string;
+  password: string;
+  rememberMe?: boolean;
+}
+
+export interface RegisterData {
   name: string;
   email: string;
-  phone?: string;
-  company?: string;
-  meetingType: string;
-  preferredDate: string;
-  preferredTime: string;
-  timezone: string;
-  message?: string;
+  password: string;
+  role?: string;
 }
 
-export const createSchedule = async (data: CreateScheduleData): Promise<ApiResponse<Schedule>> => {
-  await simulateDelay();
-  const newSchedule: Schedule = {
-    ...data,
-    _id: `schedule-${Date.now()}`,
-    status: 'pending',
-    meetingType: (data.meetingType as Schedule['meetingType']) || 'consultation',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  
-  return successResponse(newSchedule, 'Meeting scheduled successfully');
-};
-
-// ========== NEWSLETTER APIs ==========
-
-export interface NewsletterSubscriber {
-  _id?: string;
-  email: string;
-  name?: string;
-  isActive: boolean;
-  subscribedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export interface CreateNewsletterData {
-  email: string;
-  name?: string;
-}
-
-export const subscribeNewsletter = async (data: CreateNewsletterData): Promise<ApiResponse<NewsletterSubscriber>> => {
-  await simulateDelay();
-  const newSubscriber: NewsletterSubscriber = {
-    ...data,
-    _id: `subscriber-${Date.now()}`,
-    isActive: true,
-    subscribedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  
-  return successResponse(newSubscriber, 'Subscribed successfully');
-};
-
-// ========== CONSENT APIs ==========
-
-export interface ConsentRecord {
-  _id?: string;
-  consent: boolean;
-  timestamp: string;
-  userAgent: string;
-  ipAddress?: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-export const recordConsent = async (data: {
-  consent: boolean;
-  timestamp: string;
-  userAgent: string;
-}): Promise<ApiResponse> => {
-  await simulateDelay();
-  return successResponse(null, 'Consent recorded');
-};
-
-// ========== ADMIN APIs ==========
-
-export interface AdminUser {
-  uid: string;
+export interface AuthUser {
+  _id?: string; // present when Mongoose toJSON transform is absent
+  id?: string;  // present when Mongoose toJSON virtuals transform is enabled
+  name: string;
   email: string;
   role: string;
+  avatar?: string;
 }
 
-export interface AdminLoginResponse {
-  success: boolean;
-  message: string;
-  admin?: AdminUser;
+export interface AuthResponse {
+  user: AuthUser;
 }
 
-// Simulate admin login (always successful for demo)
-export const adminLogin = async (email: string, password: string): Promise<AdminLoginResponse> => {
-  await simulateDelay(1000);
-  return {
-    success: true,
-    message: "Admin login successful",
-    admin: {
-      uid: 'admin-001',
-      email: email,
-      role: 'admin'
-    }
-  };
-};
-
-export const adminLogout = async (): Promise<ApiResponse> => {
-  await simulateDelay();
-  return successResponse(null, 'Logout successful');
-};
-
-export const verifyAdmin = async (): Promise<{success: boolean; admin: any}> => {
-  await simulateDelay();
-  return { 
-    success: true, 
-    admin: {
-      uid: 'admin-001',
-      email: 'admin@example.com',
-      role: 'admin'
-    }
-  };
-};
-
-// ========== DASHBOARD APIs ==========
-
-export interface DashboardSummary {
-  totalRevenue: number;
-  totalClients: number;
-  activeProjects: number;
-  pendingConsultations: number;
-  upcomingMeetings: number;
-  recentActivities: any[];
+export interface User extends AuthUser {
+  permissions?: string[];
 }
 
-export const fetchDashboardSummary = async (): Promise<ApiResponse<DashboardSummary>> => {
-  await simulateDelay();
-  
-  const summary: DashboardSummary = {
-    totalRevenue: 3280000,
-    totalClients: fallbackClients.length,
-    activeProjects: fallbackProjects.filter(p => p.status === 'active').length,
-    pendingConsultations: fallbackConsultations.length,
-    upcomingMeetings: fallbackSchedules.filter(s => s.status === 'pending' || s.status === 'confirmed').length,
-    recentActivities: []
-  };
-  
-  return successResponse(summary);
-};
+// =============================================================================
+// ADMIN TYPES
+// =============================================================================
 
-// ========== PROJECT APIs ==========
+export type TeamMemberStatus = 'active' | 'inactive' | 'on-leave';
+
+export interface TeamMember {
+  _id: string;
+  name: string;
+  email: string;
+  role: string;
+  department: string;
+  position: string;
+  phone?: string;
+  status: TeamMemberStatus;
+  joinDate: string;
+  skills: string[];
+  projects: string[];
+  performance?: number;
+  avatar?: string;
+}
+
+export type ProjectStatus = 'active' | 'planning' | 'completed' | 'on-hold';
+export type ProjectPriority = 'high' | 'medium' | 'low';
 
 export interface Project {
-  _id?: string;
+  _id: string;
   name: string;
   client: string;
-  status: 'planning' | 'active' | 'on-hold' | 'completed' | 'cancelled';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  status: ProjectStatus;
+  priority: ProjectPriority;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   budget: number;
   spent: number;
   progress: number;
@@ -486,666 +303,650 @@ export interface Project {
   description: string;
   technologies: string[];
   deliverables: string[];
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-// Helper function to convert string status to Project status type
-const toProjectStatus = (status: string): Project['status'] => {
-  const validStatuses: Project['status'][] = ['planning', 'active', 'on-hold', 'completed', 'cancelled'];
-  return validStatuses.includes(status as any) ? (status as Project['status']) : 'planning';
-};
-
-// Helper function to convert string priority to Project priority type
-const toProjectPriority = (priority: string): Project['priority'] => {
-  const validPriorities: Project['priority'][] = ['low', 'medium', 'high', 'critical'];
-  return validPriorities.includes(priority as any) ? (priority as Project['priority']) : 'medium';
-};
-
-export const fetchProjects = async (): Promise<ApiResponse<Project[]>> => {
-  await simulateDelay();
-  
-  const projects: Project[] = fallbackProjects.map(project => ({
-    ...project,
-    _id: `project-${project.name.toLowerCase().replace(/\s+/g, '-')}`,
-    startDate: project.startDate.toISOString(),
-    endDate: project.endDate.toISOString(),
-    status: toProjectStatus(project.status),
-    priority: toProjectPriority(project.priority),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-  
-  return successResponse(projects);
-};
-
-// ========== CLIENT APIs ==========
+export type ClientStatus = 'active' | 'inactive' | 'lead';
 
 export interface Client {
-  _id?: string;
+  _id: string;
   name: string;
   email: string;
   phone?: string;
   company: string;
   industry: string;
-  status: 'active' | 'inactive' | 'lead';
+  status: ClientStatus;
   totalProjects: number;
   totalRevenue: number;
   lastContact: string;
   joinDate: string;
   notes?: string;
-  createdAt?: string;
-  updatedAt?: string;
 }
 
-// Helper function to convert string status to Client status type
-const toClientStatus = (status: string): Client['status'] => {
-  const validStatuses: Client['status'][] = ['active', 'inactive', 'lead'];
-  return validStatuses.includes(status as any) ? (status as Client['status']) : 'lead';
-};
-
-export const fetchClients = async (): Promise<ApiResponse<Client[]>> => {
-  await simulateDelay();
-  
-  const clients: Client[] = fallbackClients.map(client => ({
-    ...client,
-    _id: `client-${client.email.split('@')[0]}`,
-    lastContact: client.lastContact.toISOString(),
-    joinDate: client.joinDate.toISOString(),
-    status: toClientStatus(client.status),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-  
-  return successResponse(clients);
-};
-
-// ========== TEAM APIs ==========
-
-export interface TeamMember {
-  _id?: string;
-  name: string;
-  email: string;
-  role: string;
-  department: string;
-  position: string;
-  phone?: string;
-  avatar?: string;
-  status: 'active' | 'inactive' | 'on-leave';
-  joinDate: string;
-  skills: string[];
-  projects: string[];
-  performance: number;
-  createdAt?: string;
-  updatedAt?: string;
+export interface FinancialSummary {
+  totalRevenue: number;
+  totalProfit: number;
+  activeClients: number;
+  newClients: number;
+  avgProjectValue: number;
 }
 
-// Helper function to convert string status to TeamMember status type
-const toTeamMemberStatus = (status: string): TeamMember['status'] => {
-  const validStatuses: TeamMember['status'][] = ['active', 'inactive', 'on-leave'];
-  return validStatuses.includes(status as any) ? (status as TeamMember['status']) : 'active';
-};
+export interface RevenueDataPoint {
+  month: string;
+  revenue: number;
+  profit: number;
+}
 
-export const fetchTeamMembers = async (): Promise<ApiResponse<TeamMember[]>> => {
-  await simulateDelay();
-  
-  const teamMembers: TeamMember[] = fallbackTeamMembers.map(member => ({
-    ...member,
-    _id: `team-${member.email.split('@')[0]}`,
-    joinDate: member.joinDate.toISOString(),
-    status: toTeamMemberStatus(member.status),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-  
-  return successResponse(teamMembers);
-};
+export interface ExpenseDataPoint {
+  category: string;
+  amount: number;
+  color: string;
+}
 
-// ========== FINANCIAL APIs ==========
+export interface ClientAcquisitionDataPoint {
+  month: string;
+  newClients: number;
+  returning: number;
+}
 
-export interface FinancialData {
+export interface CashFlow {
+  inflow: number;
+  outflow: number;
+  netCashFlow: number;
+}
+
+export interface AccountsReceivable {
+  current: number;
+  overdue: number;
+  total: number;
+}
+
+export interface Financial {
+  _id: string;
   period: string;
   dateRange: string;
-  summary: {
-    totalRevenue: number;
-    totalProfit: number;
-    activeClients: number;
-    newClients: number;
-    avgProjectValue: number;
-  };
-  revenueData: Array<{ month: string; revenue: number; profit: number }>;
-  expenseData: Array<{ category: string; amount: number; color: string }>;
-  clientAcquisitionData: Array<{ month: string; newClients: number; returning: number }>;
-  cashFlow: {
-    inflow: number;
-    outflow: number;
-    netCashFlow: number;
-  };
-  accountsReceivable: {
-    current: number;
-    overdue: number;
-    total: number;
-  };
+  summary: FinancialSummary;
+  revenueData: RevenueDataPoint[];
+  expenseData: ExpenseDataPoint[];
+  clientAcquisitionData: ClientAcquisitionDataPoint[];
+  cashFlow: CashFlow;
+  accountsReceivable: AccountsReceivable;
   profitMargin: number;
 }
 
-export const fetchFinancialData = async (dateRange: string = 'monthly'): Promise<ApiResponse<FinancialData>> => {
-  await simulateDelay();
-  
-  // Find the matching data based on dateRange
-  let financialData: FinancialData;
-  
-  switch(dateRange) {
-    case 'last30Days':
-      financialData = fallbackFinancialData[0]; // Q1
-      break;
-    case 'last90Days':
-      financialData = fallbackFinancialData[1]; // Q2
-      break;
-    case 'last6Months':
-      financialData = fallbackFinancialData[2]; // Q3
-      break;
-    case 'last12Months':
-      financialData = fallbackFinancialData[3]; // Q4
-      break;
-    default:
-      financialData = fallbackFinancialData[0]; // Default to Q1
-  }
-  
-  return successResponse(financialData);
-};
-
-// ========== CONSULTATION ADMIN APIs ==========
-
-export const fetchAdminConsultations = async (): Promise<ApiResponse<Consultation[]>> => {
-  await simulateDelay();
-  const consultations: Consultation[] = fallbackConsultations.map((consult, index) => ({
-    name: consult.name,
-    email: consult.email,
-    phone: consult.phone || '',
-    message: consult.message,
-    _id: `consult-${index}`,
-    status: 'new',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-  
-  return successResponse(consultations);
-};
-
-// ========== SCHEDULE ADMIN APIs ==========
-
-// Helper function to convert string meetingType to Schedule meetingType type
-const toScheduleMeetingType = (meetingType: string): Schedule['meetingType'] => {
-  const validTypes: Schedule['meetingType'][] = ['consultation', 'demo', 'technical', 'sales', 'other'];
-  return validTypes.includes(meetingType as any) ? (meetingType as Schedule['meetingType']) : 'consultation';
-};
-
-// Helper function to convert string status to Schedule status type
-const toScheduleStatus = (status: string): Schedule['status'] => {
-  const validStatuses: Schedule['status'][] = ['pending', 'confirmed', 'cancelled', 'completed'];
-  return validStatuses.includes(status as any) ? (status as Schedule['status']) : 'pending';
-};
-
-export const fetchAdminSchedules = async (status?: string): Promise<ApiResponse<Schedule[]>> => {
-  await simulateDelay();
-  
-  let schedules: Schedule[] = fallbackSchedules.map(schedule => ({
-    ...schedule,
-    _id: `schedule-${schedule.name.toLowerCase().replace(/\s+/g, '-')}`,
-    preferredDate: schedule.preferredDate.toISOString(),
-    meetingType: toScheduleMeetingType(schedule.meetingType),
-    status: toScheduleStatus(schedule.status),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-  
-  if (status && status !== 'all') {
-    schedules = schedules.filter(s => s.status === status);
-  }
-  
-  return successResponse(schedules);
-};
-
-// ========== NEWSLETTER ADMIN APIs ==========
-
-export const getSubscribers = async (
-  page: number = 1,
-  limit: number = 10,
-  search: string = ''
-): Promise<ApiResponse<NewsletterSubscriber[]>> => {
-  await simulateDelay();
-  
-  let subscribers: NewsletterSubscriber[] = Subscribers.map(sub => ({
-    ...sub,
-    _id: `subscriber-${sub.email}`,
-    subscribedAt: sub.subscribedAt.toISOString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }));
-  
-  if (search) {
-    subscribers = subscribers.filter(s => 
-      s.email.toLowerCase().includes(search.toLowerCase()) ||
-      (s.name && s.name.toLowerCase().includes(search.toLowerCase()))
-    );
-  }
-  
-  return successResponse(subscribers);
-};
-
-// ========== CONSENT ADMIN APIs ==========
+export interface HealthCheckResponse {
+  success: boolean;
+  message: string;
+  timestamp: string;
+  environment: string;
+  version: string;
+  uptime: number;
+}
 
 export interface ConsentStats {
+  summary: {
+    totalConsent: number;
+    acceptedConsent: number;
+    declinedConsent: number;
+    acceptanceRate: number;
+  };
+  trends: Array<{
+    date: string;
+    accepted: number;
+    declined: number;
+    total: number;
+    acceptanceRate: number;
+  }>;
+}
+
+export interface SubscriberStats {
   total: number;
-  accepted: number;
-  declined: number;
-  acceptanceRate: string;
+  active: number;
+  inactive: number;
+  recent: number;
 }
 
-export const fetchConsentStats = async (range: string = 'all'): Promise<ApiResponse<ConsentStats>> => {
-  await simulateDelay();
-  
-  const stats: ConsentStats = {
-    total: fallbackConsentData.length,
-    accepted: fallbackConsentData.filter(c => c.consent).length,
-    declined: fallbackConsentData.filter(c => !c.consent).length,
-    acceptanceRate: `${((fallbackConsentData.filter(c => c.consent).length / fallbackConsentData.length) * 100).toFixed(1)}%`
-  };
-  
-  return successResponse(stats);
-};
-
-// ========== STATS APIs ==========
-
-export interface StatsData {
-  _id?: string;
-  happyClients: number;
-  projectsDone: number;
-  clientSatisfaction: number;
-  totalRevenue: number;
-  lastUpdated: string;
-  createdAt?: string;
-  updatedAt?: string;
+export interface MessageResponse {
+  success: boolean;
+  message: string;
 }
 
-export const getStats = async (): Promise<ApiResponse<StatsData>> => {
-  await simulateDelay();
-  
-  const stats: StatsData = {
-    happyClients: 150,
-    projectsDone: 85,
-    clientSatisfaction: 98,
-    totalRevenue: 3280000,
-    lastUpdated: new Date().toISOString(),
-    _id: 'stats-001',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  
-  return successResponse(stats);
-};
+// =============================================================================
+// INTERNAL TYPES
+// =============================================================================
 
-// ========== ACTIVITY APIs ==========
+type RetryableRequest = InternalAxiosRequestConfig & { _retry?: boolean };
 
-export interface Activity {
-  id: string;
-  type: string;
-  title: string;
-  description: string;
-  timestamp: string;
-  icon: string;
-  color: string;
-  user?: string;
-  priority: string;
-  isRead: boolean;
+interface QueuedRequest {
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+  config: InternalAxiosRequestConfig;
 }
 
-export const fetchRecentActivities = async (): Promise<ApiResponse<Activity[]>> => {
-  await simulateDelay();
-  
-  const activities: Activity[] = [
-    {
-      id: 'activity-1',
-      type: 'project',
-      title: 'New Project Started',
-      description: 'E-commerce website development project has started',
-      timestamp: new Date().toISOString(),
-      icon: '🚀',
-      color: 'blue',
-      user: 'John Doe',
-      priority: 'high',
-      isRead: false
+// =============================================================================
+// API CLIENT
+// =============================================================================
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'NEXT_PUBLIC_API_URL=https://corusinitiative.com/api/';
+
+class ApiClient {
+  private readonly client: AxiosInstance;
+  private isRefreshing = false;
+  private failedQueue: QueuedRequest[] = [];
+
+  constructor() {
+    this.client = axios.create({
+      baseURL: API_BASE_URL,
+      headers: { 'Content-Type': 'application/json' },
+      timeout: 30_000,
+      withCredentials: true,
+    });
+
+    this.initInterceptors();
+  }
+
+  // ---------------------------------------------------------------------------
+  // INTERCEPTORS
+  // ---------------------------------------------------------------------------
+
+  private initInterceptors(): void {
+  this.client.interceptors.request.use(
+    (config) => {
+      if (process.env.NODE_ENV === 'development') {
+        config.params = { ...config.params, _t: Date.now() };
+      }
+      return config;
     },
-    {
-      id: 'activity-2',
-      type: 'client',
-      title: 'New Client Onboarded',
-      description: 'TechCorp Inc. has become a new client',
-      timestamp: new Date(Date.now() - 3600000).toISOString(),
-      icon: '👥',
-      color: 'green',
-      user: 'Sarah Smith',
-      priority: 'medium',
-      isRead: true
+    (error) => Promise.reject(error),
+  );
+
+  this.client.interceptors.response.use(
+    (response) => response,
+    async (error: AxiosError) => {
+      const originalRequest = error.config as RetryableRequest;
+
+      if (error.response?.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        const isAuthRoute = originalRequest.url?.includes('/auth/');
+        if (isAuthRoute) {
+          return Promise.reject(this.normalizeError(error));
+        }
+
+        if (typeof window !== 'undefined') {
+          window.location.href = '/admin/login';
+        }
+        return Promise.reject(this.normalizeError(error));
+      }
+
+      return Promise.reject(this.normalizeError(error));
     },
-    {
-      id: 'activity-3',
-      type: 'finance',
-      title: 'Payment Received',
-      description: 'Payment of $25,000 received from RetailPro',
-      timestamp: new Date(Date.now() - 7200000).toISOString(),
-      icon: '💰',
-      color: 'purple',
-      user: 'Finance Team',
-      priority: 'high',
-      isRead: false
+  );
+}
+  // ---------------------------------------------------------------------------
+  // PRIVATE HELPERS
+  // ---------------------------------------------------------------------------
+
+  private async refreshToken(): Promise<void> {
+    try {
+      await this.client.post<ApiResponse>('/auth/refresh');
+    } catch {
+      throw new Error('Session expired. Please log in again.');
     }
-  ];
-  
-  return successResponse(activities);
+  }
+
+  private normalizeError(error: AxiosError): Error {
+    if (error.response) {
+      const data = error.response.data as Record<string, unknown>;
+      const message =
+        (data?.message as string) ||
+        (data?.error as string) ||
+        `Request failed with status ${error.response.status}`;
+      return new Error(message);
+    }
+    if (error.request) {
+      return new Error('Network error. Please check your connection.');
+    }
+    return new Error(error.message || 'An unexpected error occurred.');
+  }
+
+  // ---------------------------------------------------------------------------
+  // GENERIC HTTP METHODS
+  //
+  // All backend responses follow: { success, message, data: <payload> }
+  // These methods unwrap response.data.data so callers get the plain payload.
+  // ---------------------------------------------------------------------------
+
+  async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.get<ApiResponse<T>>(url, config);
+    return res.data.data as T;
+  }
+
+  async post<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.post<ApiResponse<T>>(url, data, config);
+    return res.data.data as T;
+  }
+
+  async put<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.put<ApiResponse<T>>(url, data, config);
+    return res.data.data as T;
+  }
+
+  async patch<T>(url: string, data?: unknown, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.patch<ApiResponse<T>>(url, data, config);
+    return res.data.data as T;
+  }
+
+  async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    const res = await this.client.delete<ApiResponse<T>>(url, config);
+    return res.data.data as T;
+  }
+
+  // ---------------------------------------------------------------------------
+  // SAFE HTTP METHODS — swallow errors, return fallback ?? null
+  // ---------------------------------------------------------------------------
+
+  async safeGet<T>(url: string, fallback?: T, config?: AxiosRequestConfig): Promise<T | null> {
+    try { return await this.get<T>(url, config); } catch { return fallback ?? null; }
+  }
+
+  async safePost<T>(url: string, data?: unknown, fallback?: T, config?: AxiosRequestConfig): Promise<T | null> {
+    try { return await this.post<T>(url, data, config); } catch { return fallback ?? null; }
+  }
+
+  async safePut<T>(url: string, data?: unknown, fallback?: T, config?: AxiosRequestConfig): Promise<T | null> {
+    try { return await this.put<T>(url, data, config); } catch { return fallback ?? null; }
+  }
+
+  async safePatch<T>(url: string, data?: unknown, fallback?: T, config?: AxiosRequestConfig): Promise<T | null> {
+    try { return await this.patch<T>(url, data, config); } catch { return fallback ?? null; }
+  }
+
+  async safeDelete<T>(url: string, fallback?: T, config?: AxiosRequestConfig): Promise<T | null> {
+    try { return await this.delete<T>(url, config); } catch { return fallback ?? null; }
+  }
+
+  // ---------------------------------------------------------------------------
+  // SERVER-SIDE COOKIE INJECTION
+  // ---------------------------------------------------------------------------
+
+  setCookie(cookie: string): void {
+    this.client.defaults.headers.Cookie = cookie;
+  }
+
+  // ---------------------------------------------------------------------------
+  // HEALTH CHECK
+  // ---------------------------------------------------------------------------
+
+  healthCheck(): Promise<HealthCheckResponse> {
+    return this.get<HealthCheckResponse>('/health');
+  }
+
+  // ---------------------------------------------------------------------------
+  // AUTH
+  // ---------------------------------------------------------------------------
+
+  login(credentials: LoginCredentials): Promise<AuthResponse> {
+    return this.post<AuthResponse>('/auth/login', credentials);
+  }
+
+  register(data: RegisterData): Promise<AuthResponse> {
+    return this.post<AuthResponse>('/auth/register', data);
+  }
+
+  async logout(): Promise<void> {
+    try { await this.post('/auth/logout'); } catch { /* noop */ }
+  }
+
+  getCurrentUser(): Promise<User> {
+    return this.get<User>('/auth/me');
+  }
+
+  forgotPassword(email: string): Promise<MessageResponse> {
+    return this.post<MessageResponse>('/auth/forgot-password', { email });
+  }
+
+  resetPassword(token: string, password: string): Promise<MessageResponse> {
+    return this.post<MessageResponse>('/auth/reset-password', { token, password });
+  }
+
+  async isAuthenticated(): Promise<boolean> {
+    try { await this.getCurrentUser(); return true; } catch { return false; }
+  }
+
+  // ---------------------------------------------------------------------------
+  // MENUS  →  GET /api/menus
+  //
+  // menuController must send payload directly (not wrapped):
+  //   ✅  ApiResponse.success('...', menus)     → data = Menu[]
+  //   ❌  ApiResponse.success('...', { menus }) → data = { menus: [] }  ← breaks unwrap
+  // ---------------------------------------------------------------------------
+
+  getMenus(): Promise<Menu[]> {
+    return this.get<Menu[]>('/menus');
+  }
+
+  getMenuBySlug(slug: string): Promise<Menu> {
+    return this.get<Menu>(`/menus/${slug}`);
+  }
+
+  getSolutions(): Promise<Solution[]> {
+    return this.get<Solution[]>('/solutions');
+  }
+
+  getSolutionBySlug(slug: string): Promise<Solution> {
+    return this.get<Solution>(`/menus/solutions/items/${slug}`);
+  }
+
+  getIndustries(): Promise<Industry[]> {
+    return this.get<Industry[]>('/industries');
+  }
+
+  getIndustryBySlug(slug: string): Promise<Industry> {
+    return this.get<Industry>(`/menus/industries/items/${slug}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // BLOGS
+  // ---------------------------------------------------------------------------
+getBlogs(filters?: BlogFilters): Promise<Blog[]> {
+  return this.get<{ blogs: Blog[]; pagination: any }>('/blogs', { params: filters })
+    .then(res => res.blogs);
+}
+
+getBlogBySlug(slug: string): Promise<Blog> {
+  return this.get<{ blog: Blog }>(`/blogs/${slug}`)
+    .then(res => res.blog);
+}
+  getRelatedBlogs(blogId: string, limit = 3): Promise<Blog[]> {
+    return this.get<Blog[]>(`/blogs/${blogId}/related`, { params: { limit } });
+  }
+
+  searchBlogs(query: string): Promise<Blog[]> {
+    return this.get<Blog[]>('/blogs/search', { params: { q: query } });
+  }
+
+  // ---------------------------------------------------------------------------
+  // CASE STUDIES
+  // ---------------------------------------------------------------------------
+
+getCaseStudies(): Promise<CaseStudy[]> {
+  return this.get<{ caseStudies: CaseStudy[]; pagination: any }>('/case-studies')
+    .then(res => res.caseStudies);
+}
+
+getCaseStudyBySlug(slug: string): Promise<CaseStudy> {
+  return this.get<{ caseStudy: CaseStudy }>(`/case-studies/${slug}`)
+    .then(res => res.caseStudy);
+}
+    getCaseStudiesByIndustry(industry: string): Promise<CaseStudy[]> {
+  return this.get<{ caseStudies: CaseStudy[] }>(`/case-studies/industry/${industry}`)
+    .then(res => res.caseStudies);
+}
+  // ---------------------------------------------------------------------------
+  // STATS
+  // ---------------------------------------------------------------------------
+
+
+
+// ✅ এখন
+getStats(): Promise<Stats> {
+  return this.get<Stats>('/stats/website');
+}
+
+  updateStats(data: Partial<Stats>): Promise<Stats> {
+    return this.put<Stats>('/stats', data);
+  }
+  getDashboardStats(): Promise<any> {
+  return this.get<any>('/stats/dashboard');
+}
+
+  // ---------------------------------------------------------------------------
+  // NEWSLETTER
+  // ---------------------------------------------------------------------------
+
+  subscribeNewsletter(data: NewsletterData): Promise<MessageResponse> {
+    return this.post<MessageResponse>('/newsletter/subscribe', data);
+  }
+
+  unsubscribeNewsletter(email: string): Promise<MessageResponse> {
+    return this.post<MessageResponse>('/newsletter/unsubscribe', { email });
+  }
+
+  getSubscribers(
+    filters?: { isActive?: boolean; page?: number; limit?: number },
+  ): Promise<PaginatedResponse<NewsletterSubscriber>> {
+    return this.get<PaginatedResponse<NewsletterSubscriber>>('/newsletter/subscribers', { params: filters });
+  }
+
+  deleteSubscriber(email: string): Promise<MessageResponse> {
+    return this.delete<MessageResponse>(`/newsletter/subscriber/${email}`);
+  }
+
+  getSubscriberStats(): Promise<SubscriberStats> {
+    return this.get<SubscriberStats>('/newsletter/stats');
+  }
+
+  // ---------------------------------------------------------------------------
+  // CONSULTATIONS
+  // ---------------------------------------------------------------------------
+
+  createConsultation(data: ConsultationData): Promise<MessageResponse> {
+    return this.post<MessageResponse>('/consultations', data);
+  }
+
+  getConsultations(): Promise<ConsultationData[]> {
+    return this.get<ConsultationData[]>('/consultations');
+  }
+
+  // ---------------------------------------------------------------------------
+  // SCHEDULES
+  // ---------------------------------------------------------------------------
+
+  createSchedule(data: ScheduleData): Promise<MessageResponse & { data?: Schedule }> {
+    return this.post<MessageResponse & { data?: Schedule }>('/schedules', data);
+  }
+
+  getSchedules(type?: string): Promise<Schedule[]> {
+    return this.get<Schedule[]>('/schedules', { params: { type } });
+  }
+
+  getAvailableTimeSlots(date: string): Promise<string[]> {
+    return this.get<string[]>(`/schedules/available/${date}`);
+  }
+
+  updateScheduleStatus(id: string, status: ScheduleStatus, meetingLink?: string): Promise<Schedule> {
+    return this.patch<Schedule>(`/schedules/${id}/status`, { status, meetingLink });
+  }
+
+  deleteSchedule(id: string): Promise<MessageResponse> {
+    return this.delete<MessageResponse>(`/schedules/${id}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // CONSENT
+  // ---------------------------------------------------------------------------
+
+  recordConsent(input: RecordConsentInput): Promise<MessageResponse> {
+    const payload: ConsentData = {
+      consent:   input.consent,
+      type:      input.type      ?? 'cookies',
+      email:     input.email,
+      timestamp: input.timestamp ?? new Date().toISOString(),
+      userAgent: input.userAgent ?? (typeof window !== 'undefined' ? window.navigator.userAgent : 'server-side'),
+    };
+    return this.post<MessageResponse>('/consent', payload);
+  }
+
+  getConsents(
+    filters?: { type?: string; email?: string; startDate?: string; endDate?: string },
+  ): Promise<PaginatedResponse<ConsentData>> {
+    return this.get<PaginatedResponse<ConsentData>>('/admin/consent', { params: filters });
+  }
+
+  getConsentStats(): Promise<ConsentStats> {
+    return this.get<ConsentStats>('/admin/consent/stats');
+  }
+
+  deleteConsent(id: string): Promise<MessageResponse> {
+    return this.delete<MessageResponse>(`/admin/consent/${id}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // ADMIN
+  // ---------------------------------------------------------------------------
+
+  readonly admin = {
+    team: {
+      getAll:  ():                                        Promise<TeamMember[]>    => this.get('/admin/team'),
+      getById: (id: string):                             Promise<TeamMember>      => this.get(`/admin/team/${id}`),
+      create:  (data: Partial<TeamMember>):              Promise<TeamMember>      => this.post('/admin/team', data),
+      update:  (id: string, data: Partial<TeamMember>): Promise<TeamMember>      => this.put(`/admin/team/${id}`, data),
+      delete:  (id: string):                             Promise<MessageResponse> => this.delete(`/admin/team/${id}`),
+    },
+
+    projects: {
+      getAll:       ():                                         Promise<Project[]>       => this.get('/admin/projects'),
+      getById:      (id: string):                              Promise<Project>         => this.get(`/admin/projects/${id}`),
+      create:       (data: Partial<Project>):                  Promise<Project>         => this.post('/admin/projects', data),
+      update:       (id: string, data: Partial<Project>):     Promise<Project>         => this.put(`/admin/projects/${id}`, data),
+      delete:       (id: string):                              Promise<MessageResponse> => this.delete(`/admin/projects/${id}`),
+      updateStatus: (id: string, status: ProjectStatus):      Promise<Project>         => this.patch(`/admin/projects/${id}/status`, { status }),
+    },
+
+    clients: {
+      getAll:  ():                                       Promise<Client[]>        => this.get('/admin/clients'),
+      getById: (id: string):                            Promise<Client>          => this.get(`/admin/clients/${id}`),
+      create:  (data: Partial<Client>):                 Promise<Client>          => this.post('/admin/clients', data),
+      update:  (id: string, data: Partial<Client>):    Promise<Client>          => this.put(`/admin/clients/${id}`, data),
+      delete:  (id: string):                            Promise<MessageResponse> => this.delete(`/admin/clients/${id}`),
+    },
+
+    financial: {
+      getAll:      ():                                            Promise<Financial[]>     => this.get('/admin/financial'),
+      getById:     (id: string):                                 Promise<Financial>       => this.get(`/admin/financial/${id}`),
+      getByPeriod: (period: string):                             Promise<Financial>       => this.get(`/admin/financial/period/${period}`),
+      create:      (data: Partial<Financial>):                   Promise<Financial>       => this.post('/admin/financial', data),
+      update:      (id: string, data: Partial<Financial>):      Promise<Financial>       => this.put(`/admin/financial/${id}`, data),
+      delete:      (id: string):                                 Promise<MessageResponse> => this.delete(`/admin/financial/${id}`),
+    },
+
+    simulateNewOrder: (): Promise<unknown> => this.post('/admin/simulate/order'),
+  } as const;
+}
+
+// =============================================================================
+// SINGLETON
+// =============================================================================
+
+export const api = new ApiClient();
+
+// =============================================================================
+// SAFE METHOD SHORTCUTS
+// =============================================================================
+
+export const safeGet    = <T>(url: string, fallback?: T) => api.safeGet<T>(url, fallback);
+export const safePost   = <T>(url: string, data?: unknown, fallback?: T) => api.safePost<T>(url, data, fallback);
+export const safePut    = <T>(url: string, data?: unknown, fallback?: T) => api.safePut<T>(url, data, fallback);
+export const safePatch  = <T>(url: string, data?: unknown, fallback?: T) => api.safePatch<T>(url, data, fallback);
+export const safeDelete = <T>(url: string, fallback?: T) => api.safeDelete<T>(url, fallback);
+
+// =============================================================================
+// PUBLIC ENDPOINT SHORTCUTS
+// =============================================================================
+
+export const getMenus                 = ()                               => api.getMenus();
+export const getMenuBySlug            = (slug: string)                   => api.getMenuBySlug(slug);
+
+export const getSolutions             = ()                               => api.getSolutions();
+export const getSolutionBySlug        = (slug: string)                   => api.getSolutionBySlug(slug);
+
+export const getIndustries            = ()                               => api.getIndustries();
+export const getIndustryBySlug        = (slug: string)                   => api.getIndustryBySlug(slug);
+
+export const getBlogs                 = (filters?: BlogFilters)          => api.getBlogs(filters);
+export const getBlogBySlug            = (slug: string)                   => api.getBlogBySlug(slug);
+export const getRelatedBlogs          = (blogId: string, limit?: number) => api.getRelatedBlogs(blogId, limit);
+export const searchBlogs              = (query: string)                  => api.searchBlogs(query);
+
+export const getCaseStudies           = ()                               => api.getCaseStudies();
+export const getCaseStudyBySlug       = (slug: string)                   => api.getCaseStudyBySlug(slug);
+export const getCaseStudiesByIndustry = (industry: string)               => api.getCaseStudiesByIndustry(industry);
+
+export const getStats                 = ()                               => api.getStats();
+export const updateStats              = (data: Partial<Stats>)           => api.updateStats(data);
+export const getDashboardStats = () => api.getDashboardStats();
+
+// =============================================================================
+// FORM ENDPOINT SHORTCUTS
+// =============================================================================
+
+export const subscribeNewsletter   = (data: NewsletterData)              => api.subscribeNewsletter(data);
+export const unsubscribeNewsletter = (email: string)                     => api.unsubscribeNewsletter(email);
+export const getSubscribers        = (filters?: { isActive?: boolean; page?: number; limit?: number }) => api.getSubscribers(filters);
+export const deleteSubscriber      = (email: string)                     => api.deleteSubscriber(email);
+export const getSubscriberStats    = ()                                  => api.getSubscriberStats();
+
+export const createConsultation    = (data: ConsultationData)            => api.createConsultation(data);
+export const getConsultations      = ()                                  => api.getConsultations();
+
+export const createSchedule        = (data: ScheduleData)                => api.createSchedule(data);
+export const getSchedules          = (type?: string)                     => api.getSchedules(type);
+export const getAvailableTimeSlots = (date: string)                      => api.getAvailableTimeSlots(date);
+export const updateScheduleStatus  = (id: string, status: ScheduleStatus, meetingLink?: string) => api.updateScheduleStatus(id, status, meetingLink);
+export const deleteSchedule        = (id: string)                        => api.deleteSchedule(id);
+
+export const recordConsent         = (data: RecordConsentInput)          => api.recordConsent(data);
+export const getConsents           = (filters?: { type?: string; email?: string; startDate?: string; endDate?: string }) => api.getConsents(filters);
+export const getConsentStats       = ()                                  => api.getConsentStats();
+export const deleteConsent         = (id: string)                        => api.deleteConsent(id);
+
+// =============================================================================
+// AUTH SHORTCUTS
+// =============================================================================
+
+export const login           = (credentials: LoginCredentials)           => api.login(credentials);
+export const register        = (data: RegisterData)                      => api.register(data);
+export const logout          = ()                                        => api.logout();
+export const getCurrentUser  = ()                                        => api.getCurrentUser();
+export const forgotPassword  = (email: string)                          => api.forgotPassword(email);
+export const resetPassword   = (token: string, password: string)        => api.resetPassword(token, password);
+export const isAuthenticated = ()                                        => api.isAuthenticated();
+export const healthCheck     = ()                                        => api.healthCheck();
+
+// =============================================================================
+// ADMIN SHORTCUTS
+// =============================================================================
+
+export const admin            = api.admin;
+export const simulateNewOrder = ()                                       => api.admin.simulateNewOrder();
+
+// =============================================================================
+// SERVER-SIDE HELPER
+// =============================================================================
+@example
+
+export const createServerApi = (cookie?: string): ApiClient => {
+  const serverApi = new ApiClient();
+  if (cookie) serverApi.setCookie(cookie);
+  return serverApi;
 };
 
-// ========== EXPORT/REPORT APIs ==========
+// =============================================================================
+// AUTH STATE HELPER
+// =============================================================================
 
-// Export data (simulated)
-export const exportData = async (type: string, format: string): Promise<Blob> => {
-  await simulateDelay(1000);
-  
-  // Create a dummy blob
-  const content = `Exported ${type} data in ${format} format`;
-  return new Blob([content], { type: 'text/plain' });
+export const checkAuth = async (): Promise<{ isAuthenticated: boolean; user: User | null }> => {
+  try {
+    const user = await api.getCurrentUser();
+    return { isAuthenticated: true, user };
+  } catch {
+    return { isAuthenticated: false, user: null };
+  }
 };
 
-// Send report (simulated)
-export const sendWeeklyReport = async (): Promise<ApiResponse> => {
-  await simulateDelay(1500);
-  return successResponse(null, 'Weekly report sent successfully');
-};
+// =============================================================================
+// REACT HOOK
+// =============================================================================
 
-export const sendMonthlyReport = async (): Promise<ApiResponse> => {
-  await simulateDelay(1500);
-  return successResponse(null, 'Monthly report sent successfully');
-};
+export const useApi = (): ApiClient => api;
 
-// ========== CONTENT MANAGEMENT APIs ==========
-
-// For admin content management - using fallback data
-export const fetchAdminSolutions = async (): Promise<ApiResponse<Solution[]>> => {
-  await simulateDelay();
-  return successResponse(await fetchSolutions());
-};
-
-export const fetchAdminIndustries = async (): Promise<ApiResponse<Industry[]>> => {
-  await simulateDelay();
-  return successResponse(await fetchIndustries());
-};
-
-export const fetchAdminBlogs = async (): Promise<ApiResponse<Blog[]>> => {
-  await simulateDelay();
-  return successResponse(await fetchBlogs());
-};
-
-export const fetchAdminCaseStudies = async (): Promise<ApiResponse<CaseStudy[]>> => {
-  await simulateDelay();
-  return successResponse(await fetchCaseStudies());
-};
-
-// Note: Create, update, and delete operations are simulated and don't persist
-// In a real app, these would modify the fallback data arrays
-
-// Simulate success responses for admin operations
-export const createSolution = async (data: any): Promise<ApiResponse<Solution>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `solution-${Date.now()}` }, 'Solution created successfully');
-};
-
-export const updateSolution = async (id: string, data: any): Promise<ApiResponse<Solution>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Solution updated successfully');
-};
-
-export const deleteSolution = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Solution deleted successfully');
-};
-
-// Same pattern for other entities...
-export const createIndustry = async (data: any): Promise<ApiResponse<Industry>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `industry-${Date.now()}` }, 'Industry created successfully');
-};
-
-export const createBlogPost = async (data: any): Promise<ApiResponse<Blog>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `blog-${Date.now()}` }, 'Blog post created successfully');
-};
-
-export const createCaseStudy = async (data: any): Promise<ApiResponse<CaseStudy>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `case-study-${Date.now()}` }, 'Case study created successfully');
-};
-
-export const createProject = async (data: any): Promise<ApiResponse<Project>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `project-${Date.now()}` }, 'Project created successfully');
-};
-
-export const createClient = async (data: any): Promise<ApiResponse<Client>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `client-${Date.now()}` }, 'Client created successfully');
-};
-
-export const createTeamMember = async (data: any): Promise<ApiResponse<TeamMember>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: `team-${Date.now()}` }, 'Team member created successfully');
-};
-
-// Update operations
-export const updateIndustry = async (id: string, data: any): Promise<ApiResponse<Industry>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Industry updated successfully');
-};
-
-export const updateBlogPost = async (id: string, data: any): Promise<ApiResponse<Blog>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Blog post updated successfully');
-};
-
-export const updateCaseStudy = async (id: string, data: any): Promise<ApiResponse<CaseStudy>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Case study updated successfully');
-};
-
-export const updateProject = async (id: string, data: any): Promise<ApiResponse<Project>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Project updated successfully');
-};
-
-export const updateClient = async (id: string, data: any): Promise<ApiResponse<Client>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Client updated successfully');
-};
-
-export const updateTeamMember = async (id: string, data: any): Promise<ApiResponse<TeamMember>> => {
-  await simulateDelay(1000);
-  return successResponse({ ...data, _id: id }, 'Team member updated successfully');
-};
-
-// Delete operations
-export const deleteIndustry = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Industry deleted successfully');
-};
-
-export const deleteBlogPost = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Blog post deleted successfully');
-};
-
-export const deleteCaseStudy = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Case study deleted successfully');
-};
-
-export const deleteProject = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Project deleted successfully');
-};
-
-export const deleteClient = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Client deleted successfully');
-};
-
-export const deleteTeamMember = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Team member deleted successfully');
-};
-
-// For consultation and schedule admin operations
-export const updateConsultationStatus = async (id: string, status: string): Promise<ApiResponse<Consultation>> => {
-  await simulateDelay(1000);
-  return successResponse({
-    _id: id,
-    status: status as 'new' | 'contacted' | 'in-progress' | 'completed',
-    name: 'Sample Client',
-    email: 'client@example.com',
-    message: 'Test consultation',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }, 'Consultation status updated');
-};
-
-export const deleteConsultation = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Consultation deleted');
-};
-
-export const updateAdminScheduleStatus = async (id: string, data: any): Promise<ApiResponse<Schedule>> => {
-  await simulateDelay(1000);
-  return successResponse({
-    _id: id,
-    ...data,
-    name: 'Sample User',
-    email: 'user@example.com',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  } as Schedule, 'Schedule updated');
-};
-
-export const deleteAdminSchedule = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Schedule deleted');
-};
-
-export const deleteSubscriber = async (id: string): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'Subscriber deleted');
-};
-
-export const markActivityAsRead = async (id: string): Promise<ApiResponse<Activity>> => {
-  await simulateDelay(1000);
-  return successResponse({
-    id,
-    type: 'project',
-    title: 'Activity',
-    description: 'Test activity',
-    timestamp: new Date().toISOString(),
-    icon: '📝',
-    color: 'blue',
-    isRead: true,
-    priority: 'medium'
-  }, 'Activity marked as read');
-};
-
-export const markAllActivitiesAsRead = async (): Promise<ApiResponse> => {
-  await simulateDelay(1000);
-  return successResponse(null, 'All activities marked as read');
-};
-
-export const simulateNewOrder = async (): Promise<ApiResponse<StatsData>> => {
-  await simulateDelay(1000);
-  const stats = await getStats();
-  return stats;
-};
-
-// Export all APIs for use in the application
-export default {
-  // Public APIs
-  fetchMenus,
-  fetchSolutions,
-  fetchSolutionBySlug,
-  fetchIndustries,
-  fetchIndustryBySlug,
-  fetchBlogs,
-  fetchBlogBySlug,
-  fetchCaseStudies,
-  fetchCaseStudyBySlug,
-  createConsultation,
-  createSchedule,
-  subscribeNewsletter,
-  recordConsent,
-  getStats,
-  
-  // Admin Auth
-  adminLogin,
-  adminLogout,
-  verifyAdmin,
-  
-  // Admin Dashboard
-  fetchDashboardSummary,
-  fetchProjects,
-  fetchClients,
-  fetchTeamMembers,
-  fetchFinancialData,
-  fetchAdminConsultations,
-  fetchAdminSchedules,
-  getSubscribers,
-  fetchConsentStats,
-  fetchRecentActivities,
-  
-  // Admin Content Management
-  fetchAdminSolutions,
-  fetchAdminIndustries,
-  fetchAdminBlogs,
-  fetchAdminCaseStudies,
-  
-  // CRUD Operations
-  createSolution,
-  updateSolution,
-  deleteSolution,
-  createIndustry,
-  updateIndustry,
-  deleteIndustry,
-  createBlogPost,
-  updateBlogPost,
-  deleteBlogPost,
-  createCaseStudy,
-  updateCaseStudy,
-  deleteCaseStudy,
-  createProject,
-  updateProject,
-  deleteProject,
-  createClient,
-  updateClient,
-  deleteClient,
-  createTeamMember,
-  updateTeamMember,
-  deleteTeamMember,
-  
-  // Other admin operations
-  updateConsultationStatus,
-  deleteConsultation,
-  updateAdminScheduleStatus,
-  deleteAdminSchedule,
-  deleteSubscriber,
-  markActivityAsRead,
-  markAllActivitiesAsRead,
-  
-  // Export/Report
-  exportData,
-  sendWeeklyReport,
-  sendMonthlyReport,
-  simulateNewOrder
-};
+export default api;

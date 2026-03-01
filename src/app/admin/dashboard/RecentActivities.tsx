@@ -1,127 +1,167 @@
 'use client';
 import React from 'react';
-import useAdminFetch from '../../admin/dashboard/useAdminFetch';
-import { useAuth } from '../../contexts/AuthContext';
 
-interface Activity {
-  id: string;
-  type: string;
+interface Blog {
+  _id: string;
   title: string;
-  description: string;
-  timestamp: string;
-  icon: string;
-  color: string;
-  user?: string;
-  priority: string;
-  isRead: boolean;
+  slug: string;
+  publishedAt?: string;
+  views?: number;
 }
 
-interface ActivitiesResponse {
-  success: boolean;
-  data: Activity[];
+interface CaseStudy {
+  _id: string;
+  title: string;
+  slug: string;
+  industry?: string;
+  client?: string;
+  createdAt?: string;
 }
 
-export default function RecentActivities() {
-  const { data, loading, error } = useAdminFetch<ActivitiesResponse>('/api/admin/activities/recent');
-  const { user } = useAuth();
+interface Project {
+  _id: string;
+  name: string;
+  client: string;
+  status: string;
+  progress?: number;
+}
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'user': return '👤';
-      case 'project': return '📁';
-      case 'client': return '💼';
-      case 'blog': return '📝';
-      case 'system': return '⚙️';
-      default: return '📌';
+interface Consultation {
+  _id: string;
+  name: string;
+  email: string;
+  status: string;
+  createdAt?: string;
+}
+
+interface RecentActivitiesData {
+  blogs?: Blog[];
+  caseStudies?: CaseStudy[];
+  projects?: Project[];
+  consultations?: Consultation[];
+}
+
+interface Props {
+  activities?: RecentActivitiesData;
+}
+
+export default function RecentActivities({ activities }: Props) {
+  if (!activities) {
+    return (
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
+        <div className="text-gray-500 text-center py-8">No recent activities</div>
+      </div>
+    );
+  }
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':      return 'bg-green-100 text-green-800';
+      case 'completed':   return 'bg-blue-100 text-blue-800';
+      case 'planning':    return 'bg-yellow-100 text-yellow-800';
+      case 'pending':     return 'bg-orange-100 text-orange-800';
+      case 'on-hold':     return 'bg-gray-100 text-gray-800';
+      default:            return 'bg-gray-100 text-gray-800';
     }
   };
-
-  const getActivityColor = (type: string) => {
-    switch (type) {
-      case 'user': return 'text-blue-600';
-      case 'project': return 'text-green-600';
-      case 'client': return 'text-purple-600';
-      case 'blog': return 'text-orange-600';
-      case 'system': return 'text-gray-600';
-      default: return 'text-gray-600';
-    }
-  };
-
-  if (!user) {
-    return (
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
-        <div className="text-gray-500 text-center py-8">Please login to view activities</div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
-        <div className="text-gray-500 text-center py-8">Loading activities...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
-        <div className="text-red-600 text-center py-8">Error loading activities</div>
-      </div>
-    );
-  }
-
-  const activities = data?.data || [];
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
       <h3 className="text-lg font-semibold mb-4">Recent Activities</h3>
-      
-      {activities.length === 0 ? (
-        <div className="text-gray-500 text-center py-8">No recent activities</div>
-      ) : (
-        <div className="space-y-3">
-          {activities.slice(0, 6).map((activity) => (
-            <div 
-              key={activity.id} 
-              className="flex items-start gap-3 p-3 rounded-lg border border-gray-100 hover:bg-gray-50 transition-colors"
-            >
-              <div className={`text-lg ${getActivityColor(activity.type)}`}>
-                {getActivityIcon(activity.type)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm text-gray-900 mb-1">
-                  {activity.title}
-                </div>
-                <div className="text-xs text-gray-600 mb-1">
-                  {activity.description}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400">
-                    {new Date(activity.timestamp).toLocaleDateString()} • {activity.user || 'System'}
+
+      <div className="space-y-5">
+
+        {/* Recent Consultations */}
+        {activities.consultations && activities.consultations.length > 0 && (
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              Consultations
+            </h4>
+            <div className="space-y-2">
+              {activities.consultations.slice(0, 3).map(c => (
+                <div key={c._id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{c.name}</div>
+                    <div className="text-xs text-gray-500">{c.email}</div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(c.status)}`}>
+                    {c.status}
                   </span>
-                  {activity.priority === 'high' && (
-                    <span className="px-1.5 py-0.5 bg-red-100 text-red-800 text-xs rounded">
-                      High
-                    </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Projects */}
+        {activities.projects && activities.projects.length > 0 && (
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              Projects
+            </h4>
+            <div className="space-y-2">
+              {activities.projects.slice(0, 3).map(p => (
+                <div key={p._id} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">{p.name}</div>
+                    <div className="text-xs text-gray-500">{p.client}</div>
+                  </div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(p.status)}`}>
+                    {p.status}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Recent Blogs */}
+        {activities.blogs && activities.blogs.length > 0 && (
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              Blog Posts
+            </h4>
+            <div className="space-y-2">
+              {activities.blogs.slice(0, 3).map(b => (
+                <div key={b._id} className="p-2 rounded-lg hover:bg-gray-50">
+                  <div className="text-sm font-medium text-gray-900 truncate">{b.title}</div>
+                  {b.publishedAt && (
+                    <div className="text-xs text-gray-500">
+                      {new Date(b.publishedAt).toLocaleDateString()}
+                    </div>
                   )}
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
-      )}
-      
-      {activities.length > 6 && (
-        <div className="mt-4 pt-3 border-t border-gray-100">
-          <button className="w-full text-center text-sm text-indigo-600 hover:text-indigo-800 font-medium">
-            View All Activities
-          </button>
-        </div>
-      )}
-    </div>
+          </div>
+        )}
+
+        {/* Recent Case Studies */}
+        {activities.caseStudies && activities.caseStudies.length > 0 && (
+          <div>
+            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">
+              Case Studies
+            </h4>
+            <div className="space-y-2">
+              {activities.caseStudies.slice(0, 3).map(cs => (
+                <div key={cs._id} className="p-2 rounded-lg hover:bg-gray-50">
+                  <div className="text-sm font-medium text-gray-900 truncate">{cs.title}</div>
+                  {cs.industry && (
+                    <div className="text-xs text-gray-500">{cs.industry}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* সব empty হলে */}
+        {!activities.consultations?.length && !activities.projects?.length &&
+         !activities.blogs?.length && !activities.caseStudies?.length && (
+          <div className="text-gray-500 text-center py-4">No recent activities</div>
+        )}
+      </div>
+    </div> 
   );
 }
